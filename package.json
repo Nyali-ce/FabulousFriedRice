@@ -1,0 +1,16 @@
+{
+  "name": "fabulous_fried_rice",
+  "version": "1.0.0",
+  "description": "A game about some fried rice",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "",
+  "keywords": [],
+  "author": "Nyalice <333",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^20.1.0"
+  }
+}
