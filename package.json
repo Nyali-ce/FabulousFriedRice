@@ -11,6 +11,24 @@
   "author": "Nyalice <333",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^20.1.0"
+    "electron": "^20.1.0",
+    "electron-builder": "^23.3.3"
+  },
+  "dependencies": {
+    "ws": "^8.8.1"
+  },
+  "build": {
+    "appId": "com.nyalice.fabulous_fried_rice",
+    "productName": "Fabulous Fried Rice",
+    "asar": true,
+    "files": [
+      "main.js",
+      "index.html",
+      "style.css",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
   }
 }
