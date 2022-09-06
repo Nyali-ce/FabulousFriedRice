@@ -6,9 +6,19 @@ const server = new WebSocketServer({
 });
 
 const clients = [];
+const protocol = {};
+
+const protocolFolder = fs.readdirSync(`${__dirname}/protocol`)
+const protocolFiles = protocolFolder.filter(file => file.endsWith('.js'));
+for (const file of protocolFiles) {
+    const protocolFile = require(`${__dirname}/protocol/${file}`);
+    protocol[file.split('.js')[0]] = protocolFile;
+}
 
 const packetHandler = (client, packet) => {
-
+    const { type, data } = packet;
+    if (!protocol[type]) return console.log(`Unknown packet type: ${type}`);
+    protocol[type](client, data);
 };
 
 server.on('connection', client => {

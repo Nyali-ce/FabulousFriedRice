@@ -4,6 +4,8 @@ const ctx = canvas.getContext('2d');
 const w = canvas.width = 1920;
 const h = canvas.height = 1080;
 
+let ws;
+
 String.prototype.nyaliceHash = function () {
     let hash = 0;
     for (let i = 0; i < this.length; i++) {
@@ -53,29 +55,13 @@ const login = () => {
 
     let link = 'login';
     if (formType === 'signup') link = 'signup';
-    fetch(`http://nyalice.com/api/beatstar/${link}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            username: username,
+    ws.send(JSON.stringify({
+        type: formType,
+        data: {
+            username,
             password: hash
-        })
-    }).then(res => res.json()).then(data => {
-        if (data.success) {
-            if (formType === 'signup') {
-                toggleSignup();
-                login();
-            } else {
-                document.getElementById('login').style.display = 'none';
-            }
-        } else {
-            alert(data.message);
         }
-    }).catch(err => {
-        console.error(err);
-    });
+    }))
 }
 
 const toggleSignup = () => {
@@ -96,3 +82,22 @@ const toggleSignup = () => {
 
 loginBtn.addEventListener('click', login);
 signupBtn.addEventListener('click', toggleSignup);
+
+const wsConnect = () => {
+    ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => {
+        console.log('connected')
+    }
+
+    ws.onmessage = message => {
+        const dataJson = JSON.parse(message.data)
+        // handle message
+    }
+
+    ws.onclose = () => {
+        wsConnect()
+    }
+}
+
+wsConnect();
