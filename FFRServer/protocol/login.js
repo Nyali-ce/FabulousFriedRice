@@ -21,4 +21,5 @@ module.exports = async function (socket, data) {
     if (data.password.length < 6) return error('Password must be at least 6 characters long');
 
     const userData = await user(data.username);
+
 };
