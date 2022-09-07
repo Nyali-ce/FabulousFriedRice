@@ -1,8 +1,10 @@
 const fs = require('fs');
 const { WebSocketServer } = require('ws')
 
+const port = 8080
+
 const server = new WebSocketServer({
-    port: 8080
+    port
 });
 
 const clients = [];
@@ -27,3 +29,7 @@ server.on('connection', client => {
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
     client.on('close', () => { clients.splice(clients.indexOf(client), 1); });
 });
+
+server.on('listening', () => {
+    console.log(`Server opened on port ${port}`)
+})
