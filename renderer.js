@@ -1,4 +1,24 @@
 // login
+const popup = (message) => {
+    const main = document.getElementById('login');
+    main.style.filter = 'blur(5px) brightness(0.5)';
+
+    const popupDiv = document.createElement('div');
+    popupDiv.id = 'popup';
+    popupDiv.innerHTML = message;
+
+    // remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.id = 'removeBtn';
+    removeBtn.innerHTML = 'didn\'t ask';
+    removeBtn.addEventListener('click', () => {
+        popupDiv.remove();
+        main.style.filter = 'none';
+    });
+    popupDiv.appendChild(removeBtn);
+    document.body.appendChild(popupDiv);
+}
+
 String.prototype.nyaliceHash = function () {
     let hash = 0;
     for (let i = 0; i < this.length; i++) {
@@ -22,19 +42,19 @@ const login = () => {
     const password = document.getElementById('password').value;
 
     if (username.length < 3) {
-        alert('Username must be at least 3 characters long');
+        popup('Username must be at least 3 characters long');
         return;
     }
     if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
+        popup('Password must be at least 6 characters long');
         return;
     }
     if (username.length > 20) {
-        alert('Username must be less than 20 characters long');
+        popup('Username must be less than 20 characters long');
         return;
     }
     if (password.length > 20) {
-        alert('Password must be less than 20 characters long');
+        popup('Password must be less than 20 characters long');
         return;
     }
 
@@ -85,11 +105,15 @@ const packetHandler = packet => {
 
     switch (packet.type) {
         case 'login':
-            console.log(packet)
+            if(!packet.data.success) return popup(packet.data.reason)
+            
+            popup('Logged in')
+            // document.getElementById('login').remove()
+            // render()
             break;
-            case 'signup':
-                console.log(packet)
-                break;
+        case 'signup':
+            popup(packet.data.reason)
+            break;
     }
 }
 
@@ -120,3 +144,35 @@ const ctx = canvas.getContext('2d');
 
 const w = canvas.width = 1920;
 const h = canvas.height = 1080;
+
+const fps = 165;
+
+class Player {
+    constructor(x,y) {
+        this.x = x;
+        this.y =y;
+        this.vx = 0;
+        this.vy = 0;
+        this.width = 50;
+        this.height = 100;
+        this.color = '#fff';
+
+    }
+}
+
+const render = () => {
+    let startTime = Date.now();
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, w, h);
+
+    let time = Date.now() - startTime;
+    if (time < 1000 / 165) {
+        setTimeout(() => {
+            requestAnimationFrame(render);
+        }, 1000 / 165 - time);
+    } else {
+        requestAnimationFrame(render);
+    }
+}

@@ -137,3 +137,36 @@ div#me {
     transform: translate(-50%, -50%);
     color: #777777;
 }
+
+div#popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 400px;
+    height: 130px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #36393f;
+    border-radius: 10px;
+    color: white;
+    padding: 20px;
+
+}
+
+button#removeBtn {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #36393f;
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+    border: white 2px solid;
+    outline: none;
+    cursor: pointer;
+    bottom: 0px;
+}

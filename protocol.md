@@ -93,23 +93,6 @@ signup
     {
         type: "signup",
         data: {
-            "success": true,
-            "playerData": {
-                "name": "username",
-                "id": "uuid",
-                position: {
-                    x: 0,
-                    y: 0,
-                    mapX: 0,
-                    mapY: 0
-                },
-            }
-        }
-    }
-
-    {
-        type: "signup",
-        data: {
             "success": false,
             "reason": "reason"
         }
