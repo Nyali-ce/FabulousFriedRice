@@ -1,9 +1,10 @@
 const { user } = require('../utils/database');
 
 module.exports = async function (socket, data) {
+    console.log('signup')
     const error = (msg) => {
         socket.send(JSON.stringify({
-            type: 'login',
+            type: 'signup',
             data: {
                 success: false,
                 reason: msg
@@ -22,4 +23,27 @@ module.exports = async function (socket, data) {
 
     if (userData) return error('Username already taken')
 
+    const newUser = {
+        name: data.username,
+        password: data.password,
+        id: Math.floor(Math.random() * 100000000),
+        position: {
+            x: 0,
+            y: 0,
+            mapX: 0,
+            mapY: 0
+        }
+    };
+
+    await user(data.username, newUser);
+
+    delete newUser.password;
+
+    return socket.send(JSON.stringify({
+        type: 'login',
+        data: {
+            success: true,
+            userData: newUser
+        }
+    }))
 };

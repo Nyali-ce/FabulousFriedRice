@@ -85,8 +85,11 @@ const packetHandler = packet => {
 
     switch (packet.type) {
         case 'login':
-            console.log(packet.data)
+            console.log(packet)
             break;
+            case 'signup':
+                console.log(packet)
+                break;
     }
 }
 

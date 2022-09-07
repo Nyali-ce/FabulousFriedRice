@@ -1,6 +1,7 @@
 const { user } = require('../utils/database');
 
 module.exports = async function (socket, data) {
+    console.log('signup')
     const error = (msg) => {
         socket.send(JSON.stringify({
             type: 'login',
@@ -39,5 +40,4 @@ module.exports = async function (socket, data) {
             }
         }
     }))
-    //send login
 };
