@@ -6,7 +6,7 @@ module.exports = async function (socket, data) {
             type: 'login',
             data: {
                 success: false,
-                error: msg
+                reason: msg
             }
         }));
     }
@@ -19,5 +19,24 @@ module.exports = async function (socket, data) {
     if (data.password.length < 6) return error('Password must be at least 6 characters long');
 
     const userData = await user(data.username);
-    console.log(data.username, data.password);
+
+    if (!userData) return error('Invalid username')
+    if (data.password !== userData.password) return error('Invalid password')
+
+    return socket.send(JSON.stringify({
+        type: 'login',
+        data: {
+            success: true,
+            userData: {
+                name: userData.username,
+                id: userData.id,
+                position: {
+                    x: userData.position.x,
+                    y: userData.position.y,
+                    mapX: userData.position.mapX,
+                    mapY: userData.position.mapY
+                }
+            }
+        }
+    }))
 };
