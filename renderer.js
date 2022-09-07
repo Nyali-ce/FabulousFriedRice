@@ -1,11 +1,4 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
-const w = canvas.width = 1920;
-const h = canvas.height = 1080;
-
-let ws;
-
+// login
 String.prototype.nyaliceHash = function () {
     let hash = 0;
     for (let i = 0; i < this.length; i++) {
@@ -16,18 +9,12 @@ String.prototype.nyaliceHash = function () {
     return hash;
 }
 
-const frogotPasswordBtn = document.getElementById('frogor');
-frogotPasswordBtn.addEventListener('click', () => {
-    frogotPasswordBtn.innerHTML = 'didn\'t ask';
-})
-
 let formType = 'login';
 
 const signupBtn = document.getElementById('signupBtn');
 const loginBtn = document.getElementById('loginBtn');
 
 const signupText = document.getElementById('signup_text');
-
 const formText = document.getElementById('formText');
 
 const login = () => {
@@ -83,6 +70,26 @@ const toggleSignup = () => {
 loginBtn.addEventListener('click', login);
 signupBtn.addEventListener('click', toggleSignup);
 
+const frogotPasswordBtn = document.getElementById('frogor');
+frogotPasswordBtn.addEventListener('click', () => {
+    frogotPasswordBtn.innerHTML = 'didn\'t ask';
+})
+
+
+
+// webSocket
+let ws;
+
+const packetHandler = packet => {
+    if(!packet?.type || !packet?.data) return
+
+    switch (packet.type) {
+        case 'login':
+            console.log(packet.data)
+            break;
+    }
+}
+
 const wsConnect = () => {
     ws = new WebSocket('ws://localhost:8080');
 
@@ -92,7 +99,7 @@ const wsConnect = () => {
 
     ws.onmessage = message => {
         const dataJson = JSON.parse(message.data)
-        // handle message
+        packetHandler(dataJson)
     }
 
     ws.onclose = () => {
@@ -101,3 +108,12 @@ const wsConnect = () => {
 }
 
 wsConnect();
+
+
+
+// game
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const w = canvas.width = 1920;
+const h = canvas.height = 1080;
