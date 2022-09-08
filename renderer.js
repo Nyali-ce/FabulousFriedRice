@@ -101,15 +101,15 @@ frogotPasswordBtn.addEventListener('click', () => {
 let ws;
 
 const packetHandler = packet => {
-    if(!packet?.type || !packet?.data) return
+    if (!packet?.type || !packet?.data) return
 
     switch (packet.type) {
         case 'login':
-            if(!packet.data.success) return popup(packet.data.reason)
-            
-            popup('Logged in')
-            // document.getElementById('login').remove()
-            // render()
+            if (!packet.data.success) return popup(packet.data.reason)
+
+            username = packet.data.username
+            document.getElementById('login').remove()
+            render()
             break;
         case 'signup':
             popup(packet.data.reason)
@@ -142,23 +142,37 @@ wsConnect();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-const w = canvas.width = 1920;
-const h = canvas.height = 1080;
+let w = canvas.width = window.innerWidth;
+let h = canvas.height = window.innerHeight;
+
+window.onresize = () => {
+    w = canvas.width = window.innerWidth
+    h = canvas.height = window.innerHeight
+}
 
 const fps = 165;
 
+let username;
+
 class Player {
-    constructor(x,y) {
+    constructor(x, y) {
         this.x = x;
-        this.y =y;
+        this.y = y;
         this.vx = 0;
         this.vy = 0;
         this.width = 50;
         this.height = 100;
         this.color = '#fff';
+    }
 
+    draw() {
+        ctx.fillStyle = 'white'
+        ctx.font = '30px Arial'
+        ctx.fillText(`${username}`, player.x - 20, player.y - 10);
     }
 }
+
+const player = new Player(w / 2, h / 2);
 
 const render = () => {
     let startTime = Date.now();
@@ -166,6 +180,8 @@ const render = () => {
 
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, w, h);
+
+    player.draw()
 
     let time = Date.now() - startTime;
     if (time < 1000 / 165) {
