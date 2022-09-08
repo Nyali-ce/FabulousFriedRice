@@ -29,7 +29,7 @@ module.exports = async function (socket, data) {
         data: {
             success: true,
             userData: {
-                name: userData.username,
+                username: userData.username,
                 id: userData.id,
                 position: {
                     x: userData.position.x,

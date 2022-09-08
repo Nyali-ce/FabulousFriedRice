@@ -24,7 +24,7 @@ module.exports = async function (socket, data) {
     if (userData) return error('Username already taken')
 
     const newUser = {
-        name: data.username,
+        username: data.username,
         password: data.password,
         id: Math.floor(Math.random() * 100000000),
         position: {

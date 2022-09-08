@@ -109,8 +109,16 @@ const packetHandler = packet => {
 
             loggedIn = true;
 
-            username = packet.data.userData.name
+            const { userData } = packet.data;
+
+            username = userData.username
+            player.x = userData.position.x
+            player.y = userData.position.y
+            player.mapX = userData.position.mapX
+            player.mapY = userData.position.mapY
+
             document.getElementById('login').remove()
+
             render()
             break;
         case 'signup':
@@ -166,7 +174,7 @@ const keys = {
 }
 
 window.addEventListener('keydown', e => {
-    if (!loggedIn && e.key == 'enter') login();
+    if (!loggedIn && e.key == 'Enter') login();
     if (e.key == 'w' || e.key == ' ') keys.w = true;
     if (e.key == 's') keys.s = true;
     if (e.key == 'a') keys.a = true;
@@ -183,14 +191,16 @@ window.addEventListener('keyup', e => {
 const movePlayer = () => {
     if (keys.w && player.onGround) player.vy = -7;
     if (keys.s) if (player.vy < 3) player.vy += 0.2;
-    if (keys.a) if (player.vx > 3) player.vx -= 0.2;
+    if (keys.a) if (player.vx > -3) player.vx -= 0.2;
     if (keys.d) if (player.vx < 3) player.vx += 0.2;
 }
 
 class Player {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    constructor() {
+        this.x;
+        this.y;
+        this.mapX;
+        this.mapY;
         this.vx = 0;
         this.vy = 0;
         this.w = 50;
@@ -278,9 +288,9 @@ class Wall {
     }
 }
 
-const player = new Player(w / 2, h / 2);
+const player = new Player();
 
-const walls = [new Wall(0, 400, 1000, 100, '#fff')];
+const walls = [new Wall(0, 500, 1000, 100, '#fff')];
 
 const render = () => {
     let startTime = Date.now();
