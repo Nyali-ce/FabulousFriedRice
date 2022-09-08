@@ -67,7 +67,7 @@ login
         type: "login",
         data: {
             "success": true,
-            "playerData": {
+            "userData": {
                 "name": "username",
                 "id": "uuid",
                 position: {
@@ -123,7 +123,7 @@ playerJoin
     {
         type: "playerJoin",
         data: {
-            "player": {
+            "userData": {
                 "name": "username",
                 "id": "uuid",
                 position: {
@@ -141,7 +141,7 @@ playerLeave
     {
         type: "playerLeave",
         data: {
-            "player": {
+            "userData": {
                 "name": "username",
                 "id": "uuid",
                 position: {

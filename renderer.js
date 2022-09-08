@@ -107,7 +107,9 @@ const packetHandler = packet => {
         case 'login':
             if (!packet.data.success) return popup(packet.data.reason)
 
-            username = packet.data.username
+            loggedIn = true;
+
+            username = packet.data.userData.name
             document.getElementById('login').remove()
             render()
             break;
@@ -154,25 +156,131 @@ const fps = 165;
 
 let username;
 
+let loggedIn = false;
+
+const keys = {
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+}
+
+window.addEventListener('keydown', e => {
+    if (!loggedIn && e.key == 'enter') login();
+    if (e.key == 'w' || e.key == ' ') keys.w = true;
+    if (e.key == 's') keys.s = true;
+    if (e.key == 'a') keys.a = true;
+    if (e.key == 'd') keys.d = true;
+})
+
+window.addEventListener('keyup', e => {
+    if (e.key == 'w' || e.key == ' ') keys.w = false;
+    if (e.key == 's') keys.s = false;
+    if (e.key == 'a') keys.a = false;
+    if (e.key == 'd') keys.d = false;
+})
+
+const movePlayer = () => {
+    if (keys.w && player.onGround) player.vy = -7;
+    if (keys.s) if (player.vy < 3) player.vy += 0.2;
+    if (keys.a) if (player.vx > 3) player.vx -= 0.2;
+    if (keys.d) if (player.vx < 3) player.vx += 0.2;
+}
+
 class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
         this.vx = 0;
         this.vy = 0;
-        this.width = 50;
-        this.height = 100;
+        this.w = 50;
+        this.h = 100;
         this.color = '#fff';
+        this.onGround = false;
     }
 
     draw() {
         ctx.fillStyle = 'white'
         ctx.font = '30px Arial'
-        ctx.fillText(`${username}`, player.x - 20, player.y - 10);
+        ctx.fillText(`${username}`, this.x - 20, this.y - 10);
+
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.w, this.h)
+    }
+
+    update() {
+        movePlayer();
+
+        this.vy += 0.2;
+
+        let inAir = true;
+
+        let maxSpeed = Math.abs(this.vx) > Math.abs(this.vy) ? Math.abs(this.vx) / 2 : Math.abs(this.vy) / 2;
+        if (maxSpeed < 1) maxSpeed = 1;
+
+        const range = maxSpeed * 3;
+
+        walls.forEach(wall => {
+            let touched = false;
+            //collision with left wall
+            if (this.x + this.w > wall.x && this.x + this.w < wall.x + range && this.y + this.h > wall.y && this.y < wall.bottom) {
+                touched = true;
+                this.x = wall.x - this.w;
+                if (this.vx >= 0) this.vx = 0;
+            }
+            //collision with right wall
+            if (this.x > wall.right - range && this.x < wall.right && this.y + this.h > wall.y && this.y < wall.bottom) {
+                touched = true;
+                this.x = wall.right;
+                if (this.vx <= 0) this.vx = 0;
+            }
+            //collision with top wall
+            if (this.x + this.w > wall.x && this.x < wall.right && this.y + this.h > wall.y && this.y + this.h < wall.y + range) {
+                touched = true;
+                this.y = wall.y - this.h;
+                this.vy = 0;
+                this.onGround = true;
+                inAir = false;
+            }
+            //collision with bottom wall
+            if (this.x + this.w > wall.x && this.x < wall.right && this.y > wall.bottom - range && this.y < wall.bottom) {
+                touched = true;
+                this.y = wall.bottom;
+                if (this.vy <= 0) this.vy = 0;
+            }
+        });
+
+        if (inAir) this.onGround = false;
+
+        if (this.onGround) this.vx *= 0.9;
+
+        this.vx *= 0.98;
+
+        this.x += this.vx;
+        this.y += this.vy;
+    }
+}
+
+class Wall {
+    constructor(x, y, w, h, color) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.color = color;
+        this.right = x + w;
+        this.bottom = y + h;
+    }
+
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
     }
 }
 
 const player = new Player(w / 2, h / 2);
+
+const walls = [new Wall(0, 400, 1000, 100, '#fff')];
 
 const render = () => {
     let startTime = Date.now();
@@ -181,7 +289,11 @@ const render = () => {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, w, h);
 
+    walls.forEach(wall => wall.draw())
+
+    player.update()
     player.draw()
+
 
     let time = Date.now() - startTime;
     if (time < 1000 / 165) {
