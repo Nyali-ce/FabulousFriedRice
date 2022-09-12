@@ -9,6 +9,14 @@
             "type": "solid"
         }
     ],
+    "signs": [
+        {
+            "x": 960,
+            "y": 600,
+            "text": "Welcome to my game!",
+            "font": "30 "
+        }
+    ],
     "startPosX": 960,
     "startPosY": 900
 }
