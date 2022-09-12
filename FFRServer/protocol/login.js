@@ -1,13 +1,11 @@
 const { user } = require('../utils/database');
 
 module.exports = async function (socket, data) {
-    console.log('signup')
     const error = (msg) => {
         socket.send(JSON.stringify({
             type: 'login',
             data: {
-                success: false,
-                reason: msg
+                error: msg,
             }
         }));
     }
@@ -27,7 +25,6 @@ module.exports = async function (socket, data) {
     return socket.send(JSON.stringify({
         type: 'login',
         data: {
-            success: true,
             userData: {
                 username: userData.username,
                 id: userData.id,

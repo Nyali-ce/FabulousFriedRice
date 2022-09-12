@@ -166,8 +166,8 @@ mapData
                     {
                         "x": 0,
                         "y": 0,
-                        "width": 0,
-                        "height": 0,
+                        "w": 0,
+                        "h": 0,
                         "color": "color",
                         type: "wallType"
                     }

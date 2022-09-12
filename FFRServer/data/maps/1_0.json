@@ -1,0 +1,62 @@
+{
+    "walls": [
+        {
+            "x": 0,
+            "y": 980,
+            "w": 500,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 840,
+            "y": 980,
+            "w": 300,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1400,
+            "y": 880,
+            "w": 300,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1700,
+            "y": 880,
+            "w": 200,
+            "h": 50,
+            "color": "lime",
+            "type": "bounce"
+        },
+        {
+            "x": 1600,
+            "y": 630,
+            "w": 100,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1600,
+            "y": 580,
+            "w": 50,
+            "h": 50,
+            "color": "lime",
+            "type": "bounce"
+        },
+        {
+            "x": 1600,
+            "y": 570,
+            "w": 50,
+            "h": 10,
+            "color": "white",
+            "type": "solid"
+        }
+    ],
+    "startPosX": 100,
+    "startPosY": 900
+}

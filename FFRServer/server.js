@@ -1,10 +1,10 @@
 const fs = require('fs');
 const { WebSocketServer } = require('ws')
 
-const port = 8080
+const port = 8080;
 
 const server = new WebSocketServer({
-    port
+    port,
 });
 
 const clients = [];

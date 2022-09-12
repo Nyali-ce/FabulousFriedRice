@@ -1,0 +1,22 @@
+{
+    "walls": [
+        {
+            "x": 0,
+            "y": 880,
+            "w": 600,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 600,
+            "y": 880,
+            "w": 1320,
+            "h": 50,
+            "color": "blue",
+            "type": "ice"
+        }
+    ],
+    "startPosX": 100,
+    "startPosY": 830
+}

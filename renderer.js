@@ -60,8 +60,6 @@ const login = () => {
 
     const hash = password.nyaliceHash();
 
-    let link = 'login';
-    if (formType === 'signup') link = 'signup';
     ws.send(JSON.stringify({
         type: formType,
         data: {
@@ -95,6 +93,48 @@ frogotPasswordBtn.addEventListener('click', () => {
     frogotPasswordBtn.innerHTML = 'didn\'t ask';
 })
 
+const loadingAnimation = update => {
+    const getColor = (progress) => {
+        const r = Math.floor(255 * (1 - progress));
+        const g = Math.floor(255 * progress);
+        return `rgb(${r},${g},0)`;
+    }
+
+    if (update == 'start') {
+        canvas.style.display = 'none';
+
+        const container = document.createElement('div');
+        const progressDiv = document.createElement('div');
+        const progressBar = document.createElement('div');
+
+        container.className = 'container';
+        progressDiv.className = 'progress';
+        progressBar.className = 'progress-bar';
+
+        const progressText = document.createElement('p');
+        progressText.className = 'progress-text';
+        progressText.innerHTML = 'Loading...';
+
+        progressDiv.appendChild(progressBar);
+        container.appendChild(progressDiv);
+        document.body.appendChild(container);
+
+        document.body.appendChild(progressText);
+    } else if (update == 'end') {
+        canvas.style.display = 'block';
+
+        document.getElementsByClassName('container')[0].remove();
+        document.getElementsByClassName('progress-text')[0].remove();
+
+        loading = false;
+    } else {
+        const progress = document.getElementsByClassName('progress-bar')[0];
+        progress.style.width = `${update}%`;
+        progress.style.backgroundColor = getColor(update / 100);
+
+    }
+}
+
 
 
 // webSocket
@@ -105,15 +145,15 @@ const packetHandler = packet => {
 
     switch (packet.type) {
         case 'login':
-            if (!packet.data.success) return popup(packet.data.reason)
+            if (packet.data.error) return popup(packet.data.error);
 
             loggedIn = true;
 
             const { userData } = packet.data;
 
             username = userData.username
-            player.x = userData.position.x
-            player.y = userData.position.y
+            player.x = startPosX = userData.position.x
+            player.y = startPosY = userData.position.y
             player.mapX = userData.position.mapX
             player.mapY = userData.position.mapY
 
@@ -122,9 +162,60 @@ const packetHandler = packet => {
             render()
             break;
         case 'signup':
-            popup(packet.data.reason)
+            popup(packet.data.error);
+            break;
+        case 'mapData':
+            if (packet.data.error) return player.reset();
+
+            if (loading) {
+                loadingAnimation(6);
+
+                setTimeout(() => {
+                    loadingAnimation(26);
+                    setTimeout(() => {
+                        loadingAnimation(40);
+                        setTimeout(() => {
+                            loadingAnimation(43);
+                            setTimeout(() => {
+                                loadingAnimation(74);
+                                setTimeout(() => {
+                                    loadingAnimation(100);
+                                    setTimeout(() => {
+                                        switchMap(packet.data);
+
+                                        loadingAnimation('end');
+                                    }, 500)
+                                }, 600);
+                            }, 600);
+                        }, 200);
+                    })
+                }, 1000);
+            } else switchMap(packet.data);
+
+
             break;
     }
+}
+
+const switchMap = data => {
+    const { mapData } = data
+    player.x = startPosX = mapData.startPosX;
+    player.y = startPosY = mapData.startPosY;
+
+    player.mapX = data.mapX;
+    player.mapY = data.mapY;
+
+    player.reset();
+
+    walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
+    walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
+}
+
+const sendPacket = (type, data) => {
+    ws.send(JSON.stringify({
+        type,
+        data
+    }))
 }
 
 const wsConnect = () => {
@@ -160,11 +251,12 @@ window.onresize = () => {
     h = canvas.height = window.innerHeight
 }
 
-const fps = 165;
+const fps = 60;
 
-let username;
+let username, startPosX, startPosY;
 
 let loggedIn = false;
+let loading = false;
 
 const keys = {
     w: false,
@@ -175,6 +267,13 @@ const keys = {
 
 window.addEventListener('keydown', e => {
     if (!loggedIn && e.key == 'Enter') login();
+
+    if (!loading && e.key == 'r') player.reset();
+
+    if (e.key == 't') {
+        sendPacket('mapData', { mapX: 0, mapY: 0 });
+    }
+
     if (e.key == 'w' || e.key == ' ') keys.w = true;
     if (e.key == 's') keys.s = true;
     if (e.key == 'a') keys.a = true;
@@ -197,22 +296,24 @@ const movePlayer = () => {
 
 class Player {
     constructor() {
-        this.x;
-        this.y;
-        this.mapX;
-        this.mapY;
+        this.x = 0;
+        this.y = 0;
+        this.mapX = 0;
+        this.mapY = 0;
         this.vx = 0;
         this.vy = 0;
         this.w = 50;
-        this.h = 100;
+        this.h = 50;
         this.color = '#fff';
         this.onGround = false;
+        this.onIce = false;
     }
 
     draw() {
         ctx.fillStyle = 'white'
         ctx.font = '30px Arial'
-        ctx.fillText(`${username}`, this.x - 20, this.y - 10);
+        // center text above player
+        ctx.fillText(username, this.x + this.w / 2 - ctx.measureText(username).width / 2, this.y - 10)
 
         ctx.fillStyle = this.color
         ctx.fillRect(this.x, this.y, this.w, this.h)
@@ -221,7 +322,7 @@ class Player {
     update() {
         movePlayer();
 
-        this.vy += 0.2;
+        this.vy += 0.12;
 
         let inAir = true;
 
@@ -231,48 +332,109 @@ class Player {
         const range = maxSpeed * 3;
 
         walls.forEach(wall => {
-            let touched = false;
             //collision with left wall
             if (this.x + this.w > wall.x && this.x + this.w < wall.x + range && this.y + this.h > wall.y && this.y < wall.bottom) {
-                touched = true;
-                this.x = wall.x - this.w;
-                if (this.vx >= 0) this.vx = 0;
+                switch (wall.type) {
+                    case 'bounce':
+                        this.x = wall.x - this.w;
+                        this.vx = -this.vx * 2;
+                        break;
+                    case 'spawn':
+                        break;
+                    default:
+                        this.x = wall.x - this.w;
+                        if (this.vx >= 0) this.vx = 0;
+                        break;
+                }
             }
             //collision with right wall
             if (this.x > wall.right - range && this.x < wall.right && this.y + this.h > wall.y && this.y < wall.bottom) {
-                touched = true;
-                this.x = wall.right;
-                if (this.vx <= 0) this.vx = 0;
+                switch (wall.type) {
+                    case 'bounce':
+                        this.x = wall.right;
+                        this.vx = -this.vx * 2;
+                        break;
+                    case 'spawn':
+                        break;
+                    default:
+                        this.x = wall.right;
+                        if (this.vx <= 0) this.vx = 0;
+                        break;
+                }
             }
             //collision with top wall
             if (this.x + this.w > wall.x && this.x < wall.right && this.y + this.h > wall.y && this.y + this.h < wall.y + range) {
-                touched = true;
-                this.y = wall.y - this.h;
-                this.vy = 0;
-                this.onGround = true;
-                inAir = false;
+                switch (wall.type) {
+                    case 'solid':
+                        this.y = wall.y - this.h;
+                        this.vy = 0;
+                        this.onGround = true;
+                        inAir = false;
+                        break;
+                    case 'spawn':
+                        break;
+                    case 'bounce':
+                        this.y = wall.y - this.h;
+                        this.vy = -8;
+                        break;
+                    case 'ice':
+                        this.y = wall.y - this.h;
+                        this.vy = 0;
+                        this.onGround = true;
+                        inAir = false;
+                        this.onIce = true;
+                        break;
+                    default:
+                        this.y = wall.y - this.h;
+                        this.vy = 0;
+                        break;
+                }
             }
             //collision with bottom wall
             if (this.x + this.w > wall.x && this.x < wall.right && this.y > wall.bottom - range && this.y < wall.bottom) {
-                touched = true;
-                this.y = wall.bottom;
-                if (this.vy <= 0) this.vy = 0;
+                switch (wall.type) {
+                    case 'bounce':
+                        this.y = wall.bottom;
+                        this.vy = -this.vy * 2;
+                        break;
+                    case 'spawn':
+                        break;
+                    default:
+                        this.y = wall.bottom;
+                        if (this.vy <= 0) this.vy = 0;
+                        break;
+                }
             }
         });
 
         if (inAir) this.onGround = false;
 
-        if (this.onGround) this.vx *= 0.9;
+        if (!this.onIce) {
+            if (this.onGround) this.vx *= 0.9;
+            this.vx *= 0.98;
+        }
 
-        this.vx *= 0.98;
+        this.onIce = false;
 
         this.x += this.vx;
         this.y += this.vy;
+
+        if (this.x + this.w < 0) sendPacket('mapData', { mapX: this.mapX - 1, mapY: this.mapY });
+        if (this.x > w) sendPacket('mapData', { mapX: this.mapX + 1, mapY: this.mapY });
+        if (this.y + this.h < 0) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY - 1 });
+        if (this.y > h) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY + 1 });
+    }
+
+    reset() {
+        this.x = startPosX;
+        this.y = startPosY;
+        this.vx = 0;
+        this.vy = 0;
     }
 }
 
 class Wall {
-    constructor(x, y, w, h, color) {
+    constructor(x, y, w, h, color, type) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -280,6 +442,7 @@ class Wall {
         this.color = color;
         this.right = x + w;
         this.bottom = y + h;
+        this.type = type;
     }
 
     draw() {
@@ -290,19 +453,33 @@ class Wall {
 
 const player = new Player();
 
-const walls = [new Wall(0, 500, 1000, 100, '#fff')];
+let walls = [];
 
 const render = () => {
     let startTime = Date.now();
     ctx.clearRect(0, 0, w, h);
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, w, h);
+    if (!walls.length && !loading) {
+        sendPacket('mapData', { mapX: player.mapX, mapY: player.mapY });
+        loadingAnimation('start');
+        loading = true;
+    }
 
-    walls.forEach(wall => wall.draw())
+    if (!loading) {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, w, h);
 
-    player.update()
-    player.draw()
+        walls.forEach(wall => wall.draw())
+
+        player.update()
+        player.draw()
+
+        ctx.font = '30px Arial';
+        ctx.fillStyle = 'white';
+
+        ctx.fillText(`press r to reset`, 10, 30);
+        ctx.fillText(`map: ${player.mapX}, ${player.mapY}`, 10, 60);
+    }
 
 
     let time = Date.now() - startTime;
