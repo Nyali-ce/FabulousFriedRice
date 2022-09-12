@@ -7,7 +7,6 @@ const popup = (message) => {
     popupDiv.id = 'popup';
     popupDiv.innerHTML = message;
 
-    // remove button
     const removeBtn = document.createElement('button');
     removeBtn.id = 'removeBtn';
     removeBtn.innerHTML = 'didn\'t ask';
@@ -156,6 +155,7 @@ const packetHandler = packet => {
             player.y = startPosY = userData.position.y
             player.mapX = userData.position.mapX
             player.mapY = userData.position.mapY
+            player.id = userData.id
 
             document.getElementById('login').remove()
 
@@ -171,28 +171,43 @@ const packetHandler = packet => {
                 loadingAnimation(6);
 
                 setTimeout(() => {
-                    loadingAnimation(26);
-                    setTimeout(() => {
-                        loadingAnimation(40);
-                        setTimeout(() => {
-                            loadingAnimation(43);
-                            setTimeout(() => {
-                                loadingAnimation(74);
-                                setTimeout(() => {
-                                    loadingAnimation(100);
-                                    setTimeout(() => {
-                                        switchMap(packet.data);
+                loadingAnimation(26);
+                setTimeout(() => {
+                loadingAnimation(40);
+                setTimeout(() => {
+                loadingAnimation(43);
+                setTimeout(() => {
+                loadingAnimation(74);
+                setTimeout(() => {
+                loadingAnimation(100);
+                setTimeout(() => {
 
-                                        loadingAnimation('end');
-                                    }, 500)
-                                }, 600);
-                            }, 600);
-                        }, 200);
-                    })
+                switchMap(packet.data);
+                loadingAnimation('end');
+                }, 500)
+                }, 600);
+                }, 600);
+                }, 200);
+                }, 200);
                 }, 1000);
             } else switchMap(packet.data);
 
 
+            break;
+            case 'players':
+                if(!packet.data.players) return;
+
+                const tempPlayers = packet.data.players
+                const tempFriends = [];
+
+                tempPlayers.forEach(tempPlayer => {
+                    if(tempPlayer == null) return;
+                    if(tempPlayer.id !== player.id && tempPlayer.position.mapX === player.mapX && tempPlayer.position.mapY === player.mapY) {
+                        tempFriends.push(new Friend(tempPlayer.position.x, tempPlayer.position.y, tempPlayer.position.vx, tempPlayer.position.vy, tempPlayer.position.onGround, tempPlayer.username));
+                    }
+                })
+
+                friends = tempFriends;
             break;
     }
 }
@@ -252,6 +267,7 @@ window.onresize = () => {
 }
 
 const fps = 60;
+let frame = 0;
 
 let username, startPosX, startPosY;
 
@@ -307,12 +323,12 @@ class Player {
         this.color = '#fff';
         this.onGround = false;
         this.onIce = false;
+        this.id = 0;
     }
 
     draw() {
         ctx.fillStyle = 'white'
         ctx.font = '30px Arial'
-        // center text above player
         ctx.fillText(username, this.x + this.w / 2 - ctx.measureText(username).width / 2, this.y - 10)
 
         ctx.fillStyle = this.color
@@ -433,6 +449,39 @@ class Player {
     }
 }
 
+class Friend {
+    constructor(x, y,vx,vy, onGround, username) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.onGround = onGround;
+        this.w = player.w;
+        this.h = player.h;
+        this.color = '#fff';
+        this.username = username;
+    }
+
+    draw() {
+        ctx.fillStyle = 'white'
+        ctx.font = '30px Arial'
+        ctx.fillText(this.username, this.x + this.w / 2 - ctx.measureText(this.username).width / 2, this.y - 10)
+
+        ctx.fillStyle = this.color
+        ctx.fillRect(this.x, this.y, this.w, this.h)
+    }
+
+    update() {
+        this.vx *= 0.98;
+
+        if(!this.onGround) this.vy += 0.12;
+        else this.vy = 0
+
+        this.x += this.vx;
+        this.y += this.vy;
+    }
+}
+
 class Wall {
     constructor(x, y, w, h, color, type) {
         this.x = x;
@@ -454,6 +503,7 @@ class Wall {
 const player = new Player();
 
 let walls = [];
+let friends = [];
 
 const render = () => {
     let startTime = Date.now();
@@ -469,7 +519,9 @@ const render = () => {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, w, h);
 
-        walls.forEach(wall => wall.draw())
+        walls.forEach(wall => wall.draw());
+        friends.forEach(friend => {friend.draw(); friend.update()});
+        
 
         player.update()
         player.draw()
@@ -479,8 +531,13 @@ const render = () => {
 
         ctx.fillText(`press r to reset`, 10, 30);
         ctx.fillText(`map: ${player.mapX}, ${player.mapY}`, 10, 60);
+
+        if(frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
     }
 
+
+
+    frame++;
 
     let time = Date.now() - startTime;
     if (time < 1000 / 165) {

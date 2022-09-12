@@ -126,12 +126,6 @@ playerJoin
             "userData": {
                 "name": "username",
                 "id": "uuid",
-                position: {
-                    x: 0,
-                    y: 0,
-                    mapX: 0,
-                    mapY: 0
-                },
             }
         }
     }

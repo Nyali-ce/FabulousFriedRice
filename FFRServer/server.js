@@ -4,6 +4,7 @@ const { WebSocketServer } = require('ws')
 const port = 8080;
 
 let positionInterval;
+let intervalLoop = false;
 
 const server = new WebSocketServer({
     port,
@@ -20,23 +21,36 @@ for (const file of protocolFiles) {
 }
 
 const sendPositionLoop = (active) => {
-    if(active) return positionInterval = setInterval(() => {
-        const players = clients.map(client => client.userData);
+    if(active) {positionInterval = setInterval(() => {
+        const players = [...clients.map(client => client.userData)];
 
-        players.forEach(player => { if(!player.userData) players.splice(players.indexOf(player), 1) });
+        players.forEach((player, index) => {
+            if(player === undefined) {
+                players.splice(index, 1);
+            } else {
+                delete player.password;
+            }
+        });
 
-        for (const client of clients) {
+        if(players.length > 0) for (const client of clients) {
             client.send(JSON.stringify({
                 type: 'players',
                 data: {
-                    players,
-                }
-            }));
-        }
-    }, 500);
-    else clearInterval(positionInterval);
-    
-    console.log(positionInterval, 0)
+                        players,
+                    }
+                }));
+            }
+        }, 100);
+
+        
+
+        intervalLoop = true;
+    }
+
+    else {
+        clearInterval(positionInterval);
+        intervalLoop = false;
+    }
 }
 
 const packetHandler = (client, packet) => {
@@ -47,6 +61,8 @@ const packetHandler = (client, packet) => {
 
 server.on('connection', client => {
     clients.push(client);
+
+    if(!intervalLoop) sendPositionLoop(true);
 
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
     client.on('close', () => { clients.splice(clients.indexOf(client), 1); if(clients.length === 0) sendPositionLoop(false); });
