@@ -171,43 +171,43 @@ const packetHandler = packet => {
                 loadingAnimation(6);
 
                 setTimeout(() => {
-                loadingAnimation(26);
-                setTimeout(() => {
-                loadingAnimation(40);
-                setTimeout(() => {
-                loadingAnimation(43);
-                setTimeout(() => {
-                loadingAnimation(74);
-                setTimeout(() => {
-                loadingAnimation(100);
-                setTimeout(() => {
+                    loadingAnimation(26);
+                    setTimeout(() => {
+                        loadingAnimation(40);
+                        setTimeout(() => {
+                            loadingAnimation(43);
+                            setTimeout(() => {
+                                loadingAnimation(74);
+                                setTimeout(() => {
+                                    loadingAnimation(100);
+                                    setTimeout(() => {
 
-                switchMap(packet.data);
-                loadingAnimation('end');
-                }, 500)
-                }, 600);
-                }, 600);
-                }, 200);
-                }, 200);
+                                        switchMap(packet.data);
+                                        loadingAnimation('end');
+                                    }, 500)
+                                }, 600);
+                            }, 600);
+                        }, 200);
+                    }, 200);
                 }, 1000);
             } else switchMap(packet.data);
 
 
             break;
-            case 'players':
-                if(!packet.data.players) return;
+        case 'players':
+            if (!packet.data.players) return;
 
-                const tempPlayers = packet.data.players
-                const tempFriends = [];
+            const tempPlayers = packet.data.players
+            const tempFriends = [];
 
-                tempPlayers.forEach(tempPlayer => {
-                    if(tempPlayer == null) return;
-                    if(tempPlayer.id !== player.id && tempPlayer.position.mapX === player.mapX && tempPlayer.position.mapY === player.mapY) {
-                        tempFriends.push(new Friend(tempPlayer.position.x, tempPlayer.position.y, tempPlayer.position.vx, tempPlayer.position.vy, tempPlayer.position.onGround, tempPlayer.username));
-                    }
-                })
+            tempPlayers.forEach(tempPlayer => {
+                if (tempPlayer == null) return;
+                if (tempPlayer.id !== player.id && tempPlayer.position.mapX === player.mapX && tempPlayer.position.mapY === player.mapY) {
+                    tempFriends.push(new Friend(tempPlayer.position.x, tempPlayer.position.y, tempPlayer.position.vx, tempPlayer.position.vy, tempPlayer.position.onGround, tempPlayer.username));
+                }
+            })
 
-                friends = tempFriends;
+            friends = tempFriends;
             break;
     }
 }
@@ -258,13 +258,8 @@ wsConnect();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-let w = canvas.width = window.innerWidth;
-let h = canvas.height = window.innerHeight;
-
-window.onresize = () => {
-    w = canvas.width = window.innerWidth
-    h = canvas.height = window.innerHeight
-}
+let w = canvas.width = 1920;
+let h = canvas.height = 1080;
 
 const fps = 60;
 let frame = 0;
@@ -450,7 +445,7 @@ class Player {
 }
 
 class Friend {
-    constructor(x, y,vx,vy, onGround, username) {
+    constructor(x, y, vx, vy, onGround, username) {
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -474,7 +469,7 @@ class Friend {
     update() {
         this.vx *= 0.98;
 
-        if(!this.onGround) this.vy += 0.12;
+        if (!this.onGround) this.vy += 0.12;
         else this.vy = 0
 
         this.x += this.vx;
@@ -500,10 +495,51 @@ class Wall {
     }
 }
 
+class sign {
+    constructor(x, y, text, font, color) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.font = font;
+        this.color = color;
+    }
+
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.font = font;
+
+        ctx.fillText(this.text, this.x + this.w / 2 - ctx.measureText(this.username).width / 2, this.y)
+    }
+}
+
 const player = new Player();
 
 let walls = [];
+let signs = [];
 let friends = [];
+
+const renderHud = () => {
+    ctx.font = '30px Arial';
+    ctx.fillStyle = 'white';
+
+    ctx.fillText(`r=checkpoint; t=restart`, 10, 30);
+    ctx.fillText(`map: ${player.mapX}, ${player.mapY}`, 10, 60);
+}
+
+const renderPlayers = () => {
+    friends.forEach(friend => { friend.draw(); friend.update() });
+
+    player.update()
+    player.draw()
+}
+
+const renderMap = () => {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, w, h);
+
+    walls.forEach(wall => wall.draw());
+    signs.forEach(sign => sign.draw());
+}
 
 const render = () => {
     let startTime = Date.now();
@@ -516,34 +552,20 @@ const render = () => {
     }
 
     if (!loading) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, w, h);
+        renderMap();
+        renderPlayers();
+        renderHud();
 
-        walls.forEach(wall => wall.draw());
-        friends.forEach(friend => {friend.draw(); friend.update()});
-        
-
-        player.update()
-        player.draw()
-
-        ctx.font = '30px Arial';
-        ctx.fillStyle = 'white';
-
-        ctx.fillText(`press r to reset`, 10, 30);
-        ctx.fillText(`map: ${player.mapX}, ${player.mapY}`, 10, 60);
-
-        if(frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
+        if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
     }
-
-
 
     frame++;
 
     let time = Date.now() - startTime;
-    if (time < 1000 / 165) {
+    if (time < 1000 / fps) {
         setTimeout(() => {
             requestAnimationFrame(render);
-        }, 1000 / 165 - time);
+        }, 1000 / fps - time);
     } else {
         requestAnimationFrame(render);
     }

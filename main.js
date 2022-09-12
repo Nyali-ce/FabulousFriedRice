@@ -37,8 +37,6 @@ function createWindow() {
     minHeight: 600,
     width: 1280,
     height: 720,
-    maxHeight: 1080,
-    maxWidth: 1920,
 
     icon: path.join(__dirname, 'assets/icons/64x64.png'),
     webPreferences: {

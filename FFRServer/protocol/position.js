@@ -10,14 +10,14 @@ module.exports = async function (socket, data) {
         }));
     }
 
-    if(data?.x == undefined) return error('Missing x');
-    if(data?.y == undefined) return error('Missing y');
-    if(data?.mapX == undefined) return error('Missing mapX');
-    if(data?.mapY == undefined) return error('Missing mapY');
-    if(data?.vx == undefined) return error('Missing vx');
-    if(data?.vy == undefined) return error('Missing vy');
+    if (data?.x == undefined) return error('Missing x');
+    if (data?.y == undefined) return error('Missing y');
+    if (data?.mapX == undefined) return error('Missing mapX');
+    if (data?.mapY == undefined) return error('Missing mapY');
+    if (data?.vx == undefined) return error('Missing vx');
+    if (data?.vy == undefined) return error('Missing vy');
 
-    if(!socket.userData) return error('Not logged in');
+    if (!socket.userData) return error('Not logged in');
 
     const userData = await user(socket.userData.username);
 
@@ -32,5 +32,9 @@ module.exports = async function (socket, data) {
     socket.userData.position.vy = data.vy;
     socket.userData.position.onGround = data.onGround;
 
-    await user(socket.userData.username, userData);
+    if (!socket.lastSave || socket.lastSave < new Date().getTime() - 2000) {
+        socket.lastSave = new Date().getTime();
+
+        await user(socket.userData.username, userData);
+    }
 };
