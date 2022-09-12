@@ -22,6 +22,8 @@ module.exports = async function (socket, data) {
     if (!userData) return error('Invalid username')
     if (data.password !== userData.password) return error('Invalid password')
 
+    socket.userData = userData;
+
     return socket.send(JSON.stringify({
         type: 'login',
         data: {
