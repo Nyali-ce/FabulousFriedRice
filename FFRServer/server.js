@@ -20,29 +20,30 @@ for (const file of protocolFiles) {
     protocol[file.split('.js')[0]] = protocolFile;
 }
 
-const sendPositionLoop = (active) => {
-    if(active) {positionInterval = setInterval(() => {
-        const players = [...clients.map(client => client.userData)];
+const sendPositionLoop = active => {
+    if (active) {
+        positionInterval = setInterval(() => {
+            const players = [...clients.map(client => client.userData)];
 
-        players.forEach((player, index) => {
-            if(player === undefined) {
-                players.splice(index, 1);
-            } else {
-                delete player.password;
-            }
-        });
+            players.forEach((player, index) => {
+                if (player === undefined) {
+                    players.splice(index, 1);
+                } else {
+                    delete player.password;
+                }
+            });
 
-        if(players.length > 0) for (const client of clients) {
-            client.send(JSON.stringify({
-                type: 'players',
-                data: {
+            if (players.length > 0) for (const client of clients) {
+                client.send(JSON.stringify({
+                    type: 'players',
+                    data: {
                         players,
                     }
                 }));
             }
         }, 100);
 
-        
+
 
         intervalLoop = true;
     }
@@ -62,10 +63,10 @@ const packetHandler = (client, packet) => {
 server.on('connection', client => {
     clients.push(client);
 
-    if(!intervalLoop) sendPositionLoop(true);
+    if (!intervalLoop) sendPositionLoop(true);
 
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
-    client.on('close', () => { clients.splice(clients.indexOf(client), 1); if(clients.length === 0) sendPositionLoop(false); });
+    client.on('close', () => { clients.splice(clients.indexOf(client), 1); if (clients.length === 0) sendPositionLoop(false); });
 });
 
 server.on('listening', () => {
