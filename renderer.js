@@ -225,7 +225,7 @@ const switchMap = data => {
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
 
-    if(mapData.signs) signs = mapData.signs.map(sign => new Sign(sign.x, sign.y, sign.text, sign.font, sign.color));
+    if (mapData.signs) signs = mapData.signs.map(sign => new Sign(sign.x, sign.y, sign.text, sign.font, sign.color));
 }
 
 const sendPacket = (type, data) => {
@@ -525,7 +525,7 @@ const renderHud = (playerMapX, playerMapY) => {
     ctx.fillStyle = 'white';
 
     ctx.fillText(`press r -> checkpoint; t -> restart`, 10, 30);
-    ctx.fillText(`map: ${playerX}, ${playerMapY}`, 10, 60);
+    ctx.fillText(`map: ${playerMapX}, ${playerMapY}`, 10, 60);
 }
 
 const renderPlayers = (player, friends) => {
@@ -556,7 +556,7 @@ const render = () => {
     if (!loading) {
         renderMap(walls, signs);
         renderPlayers(player, friends);
-        renderHud();
+        renderHud(player.mapX, player.mapY);
 
         if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
     }
