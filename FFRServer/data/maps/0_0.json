@@ -12,9 +12,10 @@
     "signs": [
         {
             "x": 960,
-            "y": 600,
+            "y": 800,
             "text": "Welcome to my game!",
-            "font": "30 "
+            "font": "30px Arial ",
+            "color": "white"
         }
     ],
     "startPosX": 960,

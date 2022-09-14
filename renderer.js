@@ -1,5 +1,5 @@
 // login
-const popup = (message) => {
+const popup = message => {
     const main = document.getElementById('login');
     main.style.filter = 'blur(5px) brightness(0.5)';
 
@@ -224,6 +224,8 @@ const switchMap = data => {
 
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
+
+    if(mapData.signs) signs = mapData.signs.map(sign => new Sign(sign.x, sign.y, sign.text, sign.font, sign.color));
 }
 
 const sendPacket = (type, data) => {
@@ -298,7 +300,7 @@ window.addEventListener('keyup', e => {
     if (e.key == 'd') keys.d = false;
 })
 
-const movePlayer = () => {
+const movePlayer = keys => {
     if (keys.w && player.onGround) player.vy = -7;
     if (keys.s) if (player.vy < 3) player.vy += 0.2;
     if (keys.a) if (player.vx > -3) player.vx -= 0.2;
@@ -331,7 +333,7 @@ class Player {
     }
 
     update() {
-        movePlayer();
+        movePlayer(keys);
 
         this.vy += 0.12;
 
@@ -495,7 +497,7 @@ class Wall {
     }
 }
 
-class sign {
+class Sign {
     constructor(x, y, text, font, color) {
         this.x = x;
         this.y = y;
@@ -506,9 +508,9 @@ class sign {
 
     draw() {
         ctx.fillStyle = this.color;
-        ctx.font = font;
+        ctx.font = this.xfont;
 
-        ctx.fillText(this.text, this.x + this.w / 2 - ctx.measureText(this.username).width / 2, this.y)
+        ctx.fillText(this.text, this.x - ctx.measureText(this.text).width / 2, this.y)
     }
 }
 
@@ -518,22 +520,22 @@ let walls = [];
 let signs = [];
 let friends = [];
 
-const renderHud = () => {
+const renderHud = (playerMapX, playerMapY) => {
     ctx.font = '30px Arial';
     ctx.fillStyle = 'white';
 
-    ctx.fillText(`r=checkpoint; t=restart`, 10, 30);
-    ctx.fillText(`map: ${player.mapX}, ${player.mapY}`, 10, 60);
+    ctx.fillText(`press r -> checkpoint; t -> restart`, 10, 30);
+    ctx.fillText(`map: ${playerX}, ${playerMapY}`, 10, 60);
 }
 
-const renderPlayers = () => {
+const renderPlayers = (player, friends) => {
     friends.forEach(friend => { friend.draw(); friend.update() });
 
     player.update()
     player.draw()
 }
 
-const renderMap = () => {
+const renderMap = (walls, signs) => {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, w, h);
 
@@ -552,8 +554,8 @@ const render = () => {
     }
 
     if (!loading) {
-        renderMap();
-        renderPlayers();
+        renderMap(walls, signs);
+        renderPlayers(player, friends);
         renderHud();
 
         if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
