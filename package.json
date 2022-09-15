@@ -23,8 +23,10 @@
     "asar": true,
     "files": [
       "main.js",
+      "preload.js",
       "index.html",
-      "style.css",
+      "styles.css",
+      "renderer.js",
       "node_modules/**/*"
     ],
     "directories": {

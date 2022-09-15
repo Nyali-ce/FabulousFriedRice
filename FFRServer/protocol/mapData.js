@@ -22,7 +22,7 @@ module.exports = async function (socket, data) {
         data: {
             mapX: data.mapX,
             mapY: data.mapY,
-            mapData: localMapData
+            mapData: localMapData,
         }
     }))
 };

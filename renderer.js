@@ -1,4 +1,27 @@
 // login
+String.prototype.nyaliceHash = function () {
+    let hash = 0;
+    for (let i = 0; i < this.length; i++) {
+        const char = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
+
+let formType = 'login';
+
+const signupBtn = document.getElementById('signupBtn');
+const loginBtn = document.getElementById('loginBtn');
+
+const signupText = document.getElementById('signup_text');
+const formText = document.getElementById('formText');
+
+const frogotPasswordBtn = document.getElementById('frogor');
+frogotPasswordBtn.addEventListener('click', () => {
+    frogotPasswordBtn.innerHTML = 'didn\'t ask';
+})
+
 const popup = message => {
     const main = document.getElementById('login');
     main.style.filter = 'blur(5px) brightness(0.5)';
@@ -17,24 +40,6 @@ const popup = message => {
     popupDiv.appendChild(removeBtn);
     document.body.appendChild(popupDiv);
 }
-
-String.prototype.nyaliceHash = function () {
-    let hash = 0;
-    for (let i = 0; i < this.length; i++) {
-        const char = this.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return hash;
-}
-
-let formType = 'login';
-
-const signupBtn = document.getElementById('signupBtn');
-const loginBtn = document.getElementById('loginBtn');
-
-const signupText = document.getElementById('signup_text');
-const formText = document.getElementById('formText');
 
 const login = () => {
     const username = document.getElementById('username').value;
@@ -65,7 +70,7 @@ const login = () => {
             username,
             password: hash
         }
-    }))
+    }));
 }
 
 const toggleSignup = () => {
@@ -84,16 +89,8 @@ const toggleSignup = () => {
     }
 }
 
-loginBtn.addEventListener('click', login);
-signupBtn.addEventListener('click', toggleSignup);
-
-const frogotPasswordBtn = document.getElementById('frogor');
-frogotPasswordBtn.addEventListener('click', () => {
-    frogotPasswordBtn.innerHTML = 'didn\'t ask';
-})
-
 const loadingAnimation = update => {
-    const getColor = (progress) => {
+    const getColor = progress => {
         const r = Math.floor(255 * (1 - progress));
         const g = Math.floor(255 * progress);
         return `rgb(${r},${g},0)`;
@@ -134,13 +131,16 @@ const loadingAnimation = update => {
     }
 }
 
+loginBtn.addEventListener('click', login);
+signupBtn.addEventListener('click', toggleSignup);
+
 
 
 // webSocket
 let ws;
 
 const packetHandler = packet => {
-    if (!packet?.type || !packet?.data) return
+    if (!packet?.type || !packet?.data) return;
 
     switch (packet.type) {
         case 'login':
@@ -150,14 +150,15 @@ const packetHandler = packet => {
 
             const { userData } = packet.data;
 
-            username = userData.username
-            player.x = startPosX = userData.position.x
-            player.y = startPosY = userData.position.y
-            player.mapX = userData.position.mapX
-            player.mapY = userData.position.mapY
-            player.id = userData.id
+            username = userData.username;
+            player.x = userData.position.x;
+            player.y = userData.position.y;
+            console.log(player.x, player.y);
+            player.mapX = userData.position.mapX;
+            player.mapY = userData.position.mapY;
+            player.id = userData.id;
 
-            document.getElementById('login').remove()
+            document.getElementById('login').remove();
 
             render()
             break;
@@ -197,7 +198,7 @@ const packetHandler = packet => {
         case 'players':
             if (!packet.data.players) return;
 
-            const tempPlayers = packet.data.players
+            const tempPlayers = packet.data.players;
             const tempFriends = [];
 
             tempPlayers.forEach(tempPlayer => {
@@ -213,14 +214,16 @@ const packetHandler = packet => {
 }
 
 const switchMap = data => {
-    const { mapData } = data
-    player.x = startPosX = mapData.startPosX;
-    player.y = startPosY = mapData.startPosY;
+    const { mapData } = data;
 
     player.mapX = data.mapX;
     player.mapY = data.mapY;
 
-    player.reset();
+    if(!firstMapPacket) {
+        player.x = startPosX = mapData.startPosX;
+        player.y = startPosY = mapData.startPosY;
+        player.reset();
+    }  else firstMapPacket = false;
 
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
@@ -232,23 +235,23 @@ const sendPacket = (type, data) => {
     ws.send(JSON.stringify({
         type,
         data
-    }))
+    }));
 }
 
 const wsConnect = () => {
     ws = new WebSocket('ws://localhost:8080');
 
     ws.onopen = () => {
-        console.log('connected')
+        console.log('connected');
     }
 
     ws.onmessage = message => {
-        const dataJson = JSON.parse(message.data)
-        packetHandler(dataJson)
+        const dataJson = JSON.parse(message.data);
+        packetHandler(dataJson);
     }
 
     ws.onclose = () => {
-        wsConnect()
+        wsConnect();
     }
 }
 
@@ -263,13 +266,14 @@ const ctx = canvas.getContext('2d');
 let w = canvas.width = 1920;
 let h = canvas.height = 1080;
 
-const fps = 60;
+const fps = 165;
 let frame = 0;
 
 let username, startPosX, startPosY;
 
 let loggedIn = false;
 let loading = false;
+let firstMapPacket = true;
 
 const keys = {
     w: false,
@@ -324,12 +328,12 @@ class Player {
     }
 
     draw() {
-        ctx.fillStyle = 'white'
-        ctx.font = '30px Arial'
-        ctx.fillText(username, this.x + this.w / 2 - ctx.measureText(username).width / 2, this.y - 10)
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText(username, this.x + this.w / 2 - ctx.measureText(username).width / 2, this.y - 10);
 
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.w, this.h)
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
     }
 
     update() {
@@ -460,19 +464,19 @@ class Friend {
     }
 
     draw() {
-        ctx.fillStyle = 'white'
-        ctx.font = '30px Arial'
-        ctx.fillText(this.username, this.x + this.w / 2 - ctx.measureText(this.username).width / 2, this.y - 10)
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText(this.username, this.x + this.w / 2 - ctx.measureText(this.username).width / 2, this.y - 10);
 
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, this.y, this.w, this.h)
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
     }
 
     update() {
         this.vx *= 0.98;
 
         if (!this.onGround) this.vy += 0.12;
-        else this.vy = 0
+        else this.vy = 0;
 
         this.x += this.vx;
         this.y += this.vy;
@@ -508,9 +512,9 @@ class Sign {
 
     draw() {
         ctx.fillStyle = this.color;
-        ctx.font = this.xfont;
+        ctx.font = this.font;
 
-        ctx.fillText(this.text, this.x - ctx.measureText(this.text).width / 2, this.y);
+        ctx.fillText(this.text, this.x - (ctx.measureText(this.text).width / 2), this.y);
     }
 }
 
@@ -531,8 +535,8 @@ const renderHud = (playerMapX, playerMapY) => {
 const renderPlayers = (player, friends) => {
     friends.forEach(friend => { friend.draw(); friend.update() });
 
-    player.update()
-    player.draw()
+    player.update();
+    player.draw();
 }
 
 const renderMap = (walls, signs) => {
@@ -548,7 +552,7 @@ const render = () => {
     ctx.clearRect(0, 0, w, h);
 
     if (!walls.length && !loading) {
-        sendPacket('mapData', { mapX: player.mapX, mapY: player.mapY });
+        sendPacket('mapData', { mapX: player.mapX, mapY: player.mapY});
         loadingAnimation('start');
         loading = true;
     }
