@@ -16,6 +16,13 @@
             "text": "Welcome to my game!",
             "font": "30px Arial ",
             "color": "white"
+        },
+        {
+            "x": 0,
+            "y": 0,
+            "text": "0",
+            "font": "30px Arial ",
+            "color": "green"
         }
     ],
     "startPosX": 960,

@@ -510,7 +510,7 @@ class Sign {
         ctx.fillStyle = this.color;
         ctx.font = this.xfont;
 
-        ctx.fillText(this.text, this.x - ctx.measureText(this.text).width / 2, this.y)
+        ctx.fillText(this.text, this.x - ctx.measureText(this.text).width / 2, this.y);
     }
 }
 
