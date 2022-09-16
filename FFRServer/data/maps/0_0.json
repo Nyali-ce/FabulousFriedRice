@@ -7,6 +7,54 @@
             "h": 50,
             "color": "white",
             "type": "solid"
+        },
+        {
+            "x": 1400,
+            "y": 850,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1700,
+            "y": 700,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1400,
+            "y": 550,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1700,
+            "y": 400,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1400,
+            "y": 250,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 1700,
+            "y": 100,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
         }
     ],
     "signs": [
@@ -18,8 +66,8 @@
             "color": "white"
         },
         {
-            "x": 0,
-            "y": 10,
+            "x": 960,
+            "y": 850,
             "text": "use wasd to move",
             "font": "30px Arial ",
             "color": "white"

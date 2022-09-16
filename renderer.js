@@ -219,11 +219,11 @@ const switchMap = data => {
     player.mapX = data.mapX;
     player.mapY = data.mapY;
 
-    if(!firstMapPacket) {
+    if (!firstMapPacket) {
         player.x = startPosX = mapData.startPosX;
         player.y = startPosY = mapData.startPosY;
         player.reset();
-    }  else firstMapPacket = false;
+    } else firstMapPacket = false;
 
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
@@ -438,8 +438,8 @@ class Player {
 
         if (this.x + this.w < 0) sendPacket('mapData', { mapX: this.mapX - 1, mapY: this.mapY });
         if (this.x > w) sendPacket('mapData', { mapX: this.mapX + 1, mapY: this.mapY });
-        if (this.y + this.h < 0) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY - 1 });
-        if (this.y > h) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY + 1 });
+        if (this.y + this.h < 0) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY + 1 });
+        if (this.y > h) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY - 1 });
     }
 
     reset() {
@@ -552,7 +552,7 @@ const render = () => {
     ctx.clearRect(0, 0, w, h);
 
     if (!walls.length && !loading) {
-        sendPacket('mapData', { mapX: player.mapX, mapY: player.mapY});
+        sendPacket('mapData', { mapX: player.mapX, mapY: player.mapY });
         loadingAnimation('start');
         loading = true;
     }
