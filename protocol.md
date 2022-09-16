@@ -138,12 +138,6 @@ playerLeave
             "userData": {
                 "name": "username",
                 "id": "uuid",
-                position: {
-                    x: 0,
-                    y: 0,
-                    mapX: 0,
-                    mapY: 0
-                },
             }
         }
     }
@@ -155,6 +149,8 @@ mapData
         data: {
             "mapX": 0,
             "mapY": 0,
+            "startPosX": 0,
+            "startPosy": 0,
             "mapData": {
                 "walls": [
                     {
@@ -164,6 +160,15 @@ mapData
                         "h": 0,
                         "color": "color",
                         type: "wallType"
+                    }
+                ],
+                signs [
+                    {
+                        "x": 0,
+                        "y": 0,
+                        "text": "",
+                        "font": "30px Arial",
+                        "color": "color"
                     }
                 ]
             }
