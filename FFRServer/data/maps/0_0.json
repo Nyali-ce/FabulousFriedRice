@@ -68,7 +68,7 @@
         {
             "x": 960,
             "y": 850,
-            "text": "use wasd to move",
+            "text": "Use wasd to move",
             "font": "30px Arial ",
             "color": "white"
         }

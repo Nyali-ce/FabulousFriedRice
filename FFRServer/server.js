@@ -57,7 +57,7 @@ const sendPositionLoop = active => {
 const packetHandler = (client, packet) => {
     const { type, data } = packet;
     if (!protocol[type]) return console.log(`Unknown packet type: ${type}`);
-    protocol[type](client, data);
+    protocol[type](client, data, clients);
 };
 
 server.on('connection', client => {
@@ -66,7 +66,22 @@ server.on('connection', client => {
     if (!intervalLoop) sendPositionLoop(true);
 
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
-    client.on('close', () => { clients.splice(clients.indexOf(client), 1); if (clients.length === 0) sendPositionLoop(false); });
+    client.on('close', () => {
+        if (client.userData) {
+            console.log(client.userData);
+            clients.forEach(player => player.send(JSON.stringify({
+                type: 'playerLeave',
+                data: {
+                    player: {
+                        username: client.userData.username,
+                        id: client.userData.id,
+                    }
+                }
+            })));
+        }
+
+        clients.splice(clients.indexOf(client), 1); if (clients.length === 0) sendPositionLoop(false);
+    });
 });
 
 server.on('listening', () => {

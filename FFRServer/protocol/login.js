@@ -1,6 +1,6 @@
 const { user } = require('../utils/database');
 
-module.exports = async function (socket, data) {
+module.exports = async function (socket, data, clients) {
     const error = (msg) => {
         socket.send(JSON.stringify({
             type: 'login',
@@ -24,7 +24,7 @@ module.exports = async function (socket, data) {
 
     socket.userData = userData;
 
-    return socket.send(JSON.stringify({
+    socket.send(JSON.stringify({
         type: 'login',
         data: {
             userData: {
@@ -39,4 +39,19 @@ module.exports = async function (socket, data) {
             }
         }
     }))
+
+    console.log(clients)
+    if (!clients) return;
+
+    clients.forEach(client => {
+        client.send(JSON.stringify({
+            type: 'playerJoin',
+            data: {
+                player: {
+                    username: userData.username,
+                    id: userData.id,
+                }
+            }
+        }))
+    });
 };

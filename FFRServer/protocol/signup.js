@@ -37,7 +37,7 @@ module.exports = async function (socket, data) {
 
     delete newUser.password;
 
-    socket.userData = userData;
+    socket.userData = newUser;
 
     return socket.send(JSON.stringify({
         type: 'login',

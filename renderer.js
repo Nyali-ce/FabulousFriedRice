@@ -153,7 +153,6 @@ const packetHandler = packet => {
             username = userData.username;
             player.x = userData.position.x;
             player.y = userData.position.y;
-            console.log(player.x, player.y);
             player.mapX = userData.position.mapX;
             player.mapY = userData.position.mapY;
             player.id = userData.id;
@@ -185,6 +184,7 @@ const packetHandler = packet => {
 
                                         switchMap(packet.data);
                                         loadingAnimation('end');
+                                        document.getElementById('chat').style.display = 'block';
                                     }, 500)
                                 }, 600);
                             }, 600);
@@ -209,6 +209,12 @@ const packetHandler = packet => {
             })
 
             friends = tempFriends;
+            break;
+        case 'playerJoin':
+            console.log(packet.data);
+            break;
+        case 'playerLeave':
+            console.log(packet.data);
             break;
     }
 }
@@ -427,10 +433,8 @@ class Player {
 
         if (!this.onIce) {
             if (this.onGround) this.vx *= 0.9;
-            this.vx *= 0.98;
+            this.vx *= 0.9;
         }
-
-        console.log(this.onGround, this.vy);
 
         this.x += this.vx;
         this.y += this.vy;
@@ -527,8 +531,7 @@ const renderHud = (playerMapX, playerMapY) => {
     ctx.font = '30px Arial';
     ctx.fillStyle = 'white';
 
-    ctx.fillText(`press r -> checkpoint; t -> restart`, 10, 30);
-    ctx.fillText(`map: ${playerMapX}, ${playerMapY}`, 10, 60);
+    ctx.fillText(`map position: ${playerMapX}, ${playerMapY}`, 10, 30);
 }
 
 const renderPlayers = (player, friends) => {
@@ -539,7 +542,7 @@ const renderPlayers = (player, friends) => {
 }
 
 const renderMap = (walls, signs) => {
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#607279';
     ctx.fillRect(0, 0, w, h);
 
     walls.forEach(wall => wall.draw());
