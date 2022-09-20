@@ -40,7 +40,6 @@ module.exports = async function (socket, data, clients) {
         }
     }))
 
-    console.log(clients)
     if (!clients) return;
 
     clients.forEach(client => {

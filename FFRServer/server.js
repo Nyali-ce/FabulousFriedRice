@@ -68,7 +68,6 @@ server.on('connection', client => {
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
     client.on('close', () => {
         if (client.userData) {
-            console.log(client.userData);
             clients.forEach(player => player.send(JSON.stringify({
                 type: 'playerLeave',
                 data: {
