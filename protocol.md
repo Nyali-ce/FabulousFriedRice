@@ -16,7 +16,7 @@ login
         type: "login",
         data: {
             "username": "username",
-            "password": "password"
+            "password": "hash"
         }
     }
 
@@ -188,4 +188,3 @@ leaderboard
             ]
         }
     }
-
