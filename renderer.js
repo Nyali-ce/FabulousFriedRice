@@ -229,6 +229,7 @@ const switchMap = data => {
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
 
     if (mapData.signs) signs = mapData.signs.map(sign => new Sign(sign.x, sign.y, sign.text, sign.font, sign.color));
+    else signs = [];
 }
 
 const sendPacket = (type, data) => {
@@ -341,7 +342,8 @@ class Player {
 
         this.vy += 0.12;
 
-        let inAir = true;
+        this.onGround = false;
+        this.onIce = false;
 
         let maxSpeed = Math.abs(this.vx) > Math.abs(this.vy) ? Math.abs(this.vx) / 2 : Math.abs(this.vy) / 2;
         if (maxSpeed < 1) maxSpeed = 1;
@@ -380,13 +382,12 @@ class Player {
                 }
             }
             //collision with top wall
-            if (this.x + this.w > wall.x && this.x < wall.right && this.y + this.h > wall.y && this.y + this.h < wall.y + range) {
+            if (this.x + this.w > wall.x && this.x < wall.right && this.y + this.h + this.vy > wall.y && this.y + this.h < wall.y + range) {
                 switch (wall.type) {
                     case 'solid':
                         this.y = wall.y - this.h;
                         this.vy = 0;
                         this.onGround = true;
-                        inAir = false;
                         break;
                     case 'spawn':
                         break;
@@ -398,12 +399,12 @@ class Player {
                         this.y = wall.y - this.h;
                         this.vy = 0;
                         this.onGround = true;
-                        inAir = false;
                         this.onIce = true;
                         break;
                     default:
                         this.y = wall.y - this.h;
                         this.vy = 0;
+                        this.onGround = true;
                         break;
                 }
             }
@@ -424,14 +425,12 @@ class Player {
             }
         });
 
-        if (inAir) this.onGround = false;
-
         if (!this.onIce) {
             if (this.onGround) this.vx *= 0.9;
             this.vx *= 0.98;
         }
 
-        this.onIce = false;
+        console.log(this.onGround, this.vy);
 
         this.x += this.vx;
         this.y += this.vy;
