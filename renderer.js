@@ -191,7 +191,10 @@ const packetHandler = packet => {
                         }, 200);
                     }, 200);
                 }, 1000);
-            } else switchMap(packet.data);
+            } else {
+                switchMap(packet.data);
+                document.getElementById('chat').style.display = 'block';
+            }
 
 
             break;
@@ -211,12 +214,22 @@ const packetHandler = packet => {
             friends = tempFriends;
             break;
         case 'playerJoin':
-            console.log(packet.data);
+            chatMessage(packet.data.userData.username + ' joined the game', 'system');
             break;
         case 'playerLeave':
             console.log(packet.data);
             break;
     }
+}
+
+const chatMessage = (text, sender) => {
+    const chat = document.getElementById('chat');
+
+    const message = document.createElement('p');
+    message.className = 'message';
+    message.innerHTML = `<span class="sender">${sender}</span>: ${text}`;
+
+    chat.appendChild(message);
 }
 
 const switchMap = data => {
@@ -290,6 +303,7 @@ const keys = {
 }
 
 window.addEventListener('keydown', e => {
+    if (e.key == 'Backspace') chatMessage('test', 'test');
     if (!loggedIn && e.key == 'Enter') login();
 
     if (!loading && e.key == 'r') player.reset();

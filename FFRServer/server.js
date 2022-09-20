@@ -42,12 +42,8 @@ const sendPositionLoop = active => {
                 }));
             }
         }, 100);
-
-
-
         intervalLoop = true;
     }
-
     else {
         clearInterval(positionInterval);
         intervalLoop = false;

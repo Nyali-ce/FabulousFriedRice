@@ -46,7 +46,7 @@ module.exports = async function (socket, data, clients) {
         client.send(JSON.stringify({
             type: 'playerJoin',
             data: {
-                player: {
+                userData: {
                     username: userData.username,
                     id: userData.id,
                 }
