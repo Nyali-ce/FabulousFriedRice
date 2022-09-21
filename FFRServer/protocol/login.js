@@ -40,6 +40,8 @@ module.exports = async function (socket, data, clients) {
         }
     }))
 
+    console.log(`User ${userData.username} logged in`);
+
     if (!clients) return;
 
     clients.forEach(client => {

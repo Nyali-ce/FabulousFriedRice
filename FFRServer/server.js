@@ -33,6 +33,8 @@ const sendPositionLoop = active => {
                 }
             });
 
+            console.log(`Sending position data to ${clients.length} clients`);
+
             if (players.length > 0) for (const client of clients) {
                 client.send(JSON.stringify({
                     type: 'players',

@@ -32,6 +32,8 @@ module.exports = async function (socket, data) {
     socket.userData.position.vy = data.vy;
     socket.userData.position.onGround = data.onGround;
 
+    console.log(`User ${userData.username} position updated`);
+
     if (!socket.lastSave || socket.lastSave < new Date().getTime() - 2000) {
         socket.lastSave = new Date().getTime();
 

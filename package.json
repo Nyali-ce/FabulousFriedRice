@@ -1,6 +1,6 @@
 {
   "name": "fabulous_fried_rice",
-  "version": "1.0.0",
+  "version": "0.0.1a",
   "description": "A game about some fried rice",
   "main": "main.js",
   "scripts": {
