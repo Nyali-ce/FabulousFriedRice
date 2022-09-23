@@ -23,6 +23,7 @@ frogotPasswordBtn.addEventListener('click', () => {
 })
 
 const popup = message => {
+    if (document.getElementById('popup')) return;
     const main = document.getElementById('login');
     main.style.filter = 'blur(5px) brightness(0.5)';
 
@@ -285,7 +286,7 @@ const sendPacket = (type, data) => {
 }
 
 const wsConnect = () => {
-    ws = new WebSocket('ws://localhost:8080');
+    ws = new WebSocket('ws://nyalice.com:8080');
 
     ws.onopen = () => {
         console.log('connected');
@@ -349,10 +350,18 @@ window.addEventListener('keydown', e => {
         if (e.key == 'd') keys.d = true;
     } else {
         if (e.key == 'Enter') {
-            sendPacket('message', { message: document.getElementById('chatinput').value });
-            document.getElementById('chatinput').value = '';
-            document.getElementById('chatinput').blur();
-            typing = false;
+            const chatInput = document.getElementById('chatinput');
+            const message = chatInput.value;
+
+            if (message.length > 0) {
+                sendPacket('message', { message: document.getElementById('chatinput').value });
+                document.getElementById('chatinput').value = '';
+                document.getElementById('chatinput').blur();
+                typing = false;
+            } else {
+                document.getElementById('chatinput').blur();
+                typing = false;
+            }
         }
     }
 })
@@ -375,7 +384,7 @@ document.getElementById('chatinput').addEventListener('focusout', e => {
     typing = false;
 })
 
-document.getElementById('chatinput').addEventListener('click', e => {
+document.getElementById('chatinput').addEventListener('focusin', e => {
     typing = true;
 })
 
@@ -430,7 +439,7 @@ class Player {
                 switch (wall.type) {
                     case 'bounce':
                         this.x = wall.x - this.w;
-                        this.vx = -this.vx * 2;
+                        this.vx = -this.vx * 3;
                         break;
                     case 'spawn':
                         break;
@@ -448,7 +457,7 @@ class Player {
                 switch (wall.type) {
                     case 'bounce':
                         this.x = wall.right;
-                        this.vx = -this.vx * 2;
+                        this.vx = -this.vx * 3;
                         break;
                     case 'reset':
                         this.reset();
@@ -643,7 +652,7 @@ const render = () => {
         renderPlayers(player, friends);
         renderHud(player.mapX, player.mapY);
 
-        ctx.fillText(`f|m: ${fps} | ${1000 / fps} `, w / 2 - (ctx.measureText(`f|m: ${fps} | ${1000 / fps} `).width / 2), 90);
+        ctx.fillText(`fps: ${fps} | ${Math.floor(1000 / fps)}`, w / 2 - (ctx.measureText(`fps: ${fps} | ${Math.floor(1000 / fps)}`).width / 2), 90);
 
         if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround, fps: fps });
     }

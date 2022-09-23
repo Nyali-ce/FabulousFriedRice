@@ -71,6 +71,30 @@
             "h": 350,
             "color": "white",
             "type": "solid"
+        },
+        {
+            "x": 250,
+            "y": 400,
+            "w": 50,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 450,
+            "y": 300,
+            "w": 200,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        },
+        {
+            "x": 950,
+            "y": 180,
+            "w": 100,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
         }
     ],
     "startPosX": 960,

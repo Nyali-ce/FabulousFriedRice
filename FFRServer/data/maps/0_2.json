@@ -1,0 +1,22 @@
+{
+    "walls": [
+        {
+            "x": 910,
+            "y": 1129,
+            "w": 200,
+            "h": 50,
+            "color": "lime",
+            "type": "bounce"
+        },
+        {
+            "x": 750,
+            "y": 900,
+            "w": 150,
+            "h": 50,
+            "color": "white",
+            "type": "solid"
+        }
+    ],
+    "startPosX": 800,
+    "startPosY": 800
+}
