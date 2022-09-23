@@ -26,14 +26,12 @@ const sendPositionLoop = active => {
             const players = [...clients.map(client => client.userData)];
 
             players.forEach((player, index) => {
-                if (player === undefined) {
+                if (player === undefined || player.position === undefined) {
                     players.splice(index, 1);
                 } else {
                     delete player.password;
                 }
             });
-
-            console.log(`Sending position data to ${clients.length} clients`);
 
             if (players.length > 0) for (const client of clients) {
                 client.send(JSON.stringify({
@@ -65,13 +63,15 @@ server.on('connection', client => {
 
     client.on('message', packet => { packetHandler(client, JSON.parse(packet)); });
     client.on('close', () => {
+        const username = client.userData?.username;
+        const id = client.userData?.id;
         if (client.userData) {
             clients.forEach(player => player.send(JSON.stringify({
                 type: 'playerLeave',
                 data: {
-                    player: {
-                        username: client.userData.username,
-                        id: client.userData.id,
+                    userData: {
+                        username,
+                        id,
                     }
                 }
             })));

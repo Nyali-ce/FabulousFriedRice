@@ -184,7 +184,7 @@ const packetHandler = packet => {
 
                                         switchMap(packet.data);
                                         loadingAnimation('end');
-                                        document.getElementById('chat').style.display = 'block';
+                                        document.getElementById('chatBox').style.display = 'block';
                                     }, 500)
                                 }, 600);
                             }, 600);
@@ -193,7 +193,7 @@ const packetHandler = packet => {
                 }, 1000);
             } else {
                 switchMap(packet.data);
-                document.getElementById('chat').style.display = 'block';
+                document.getElementById('chatBox').style.display = 'block';
             }
 
 
@@ -207,7 +207,7 @@ const packetHandler = packet => {
             tempPlayers.forEach(tempPlayer => {
                 if (tempPlayer == null) return;
                 if (tempPlayer.id !== player.id && tempPlayer.position.mapX === player.mapX && tempPlayer.position.mapY === player.mapY) {
-                    tempFriends.push(new Friend(tempPlayer.position.x, tempPlayer.position.y, tempPlayer.position.vx, tempPlayer.position.vy, tempPlayer.position.onGround, tempPlayer.username));
+                    tempFriends.push(new Friend(tempPlayer.position.x, tempPlayer.position.y, tempPlayer.position.vx, tempPlayer.position.vy, tempPlayer.position.onGround, tempPlayer.username, tempPlayer.fps));
                 }
             })
 
@@ -217,8 +217,10 @@ const packetHandler = packet => {
             chatMessage(packet.data.userData.username + ' joined the game', 'system');
             break;
         case 'playerLeave':
-            console.log(packet.data);
+            chatMessage(packet.data.userData.username + ' left the game', 'system');
             break;
+        case 'message':
+            chatMessage(packet.data.message, packet.data.username);
     }
 }
 
@@ -230,6 +232,23 @@ const chatMessage = (text, sender) => {
     message.innerHTML = `<span class="sender">${sender}</span>: ${text}`;
 
     chat.appendChild(message);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
+document.getElementById('hidechat').onclick = () => {
+    const chat = document.getElementById('chat');
+    const hidechat = document.getElementById('hidechat');
+    const chatinput = document.getElementById('chatinput');
+    if (chat.style.display === 'none') {
+        chat.style.display = 'block';
+        hidechat.innerHTML = 'Hide Chat';
+        chatinput.style.display = 'block';
+    } else {
+        chat.style.display = 'none';
+        hidechat.innerHTML = 'Show Chat';
+        chatinput.style.display = 'none';
+    }
 }
 
 const switchMap = data => {
@@ -238,10 +257,17 @@ const switchMap = data => {
     player.mapX = data.mapX;
     player.mapY = data.mapY;
 
+    startPosX = mapData.startPosX;
+    startPosY = mapData.startPosY;
+
     if (!firstMapPacket) {
-        player.x = startPosX = mapData.startPosX;
-        player.y = startPosY = mapData.startPosY;
-        player.reset();
+        if (!mapData.direction) player.reset();
+        else {
+            if (mapData.direction === 'left') player.x = w - 1;
+            else if (mapData.direction === 'right') player.x = 1;
+            else if (mapData.direction === 'up') player.y = h - 1;
+            else if (mapData.direction === 'down') player.y = 1;
+        }
     } else firstMapPacket = false;
 
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
@@ -259,7 +285,7 @@ const sendPacket = (type, data) => {
 }
 
 const wsConnect = () => {
-    ws = new WebSocket('ws://nyalice.com:8080');
+    ws = new WebSocket('ws://localhost:8080');
 
     ws.onopen = () => {
         console.log('connected');
@@ -288,13 +314,16 @@ const ctx = canvas.getContext('2d');
 let w = canvas.width = 1920;
 let h = canvas.height = 1080;
 
-const fps = 165;
+let fps = 1
 let frame = 0;
+let frameStart = 0;
+let lastFrames = [];
 
 let username, startPosX, startPosY;
 
 let loggedIn = false;
 let loading = false;
+let typing = false;
 let firstMapPacket = true;
 
 const keys = {
@@ -305,26 +334,49 @@ const keys = {
 }
 
 window.addEventListener('keydown', e => {
-    if (e.key == 'Backspace') chatMessage('test', 'test');
-    if (!loggedIn && e.key == 'Enter') login();
+    if (!typing) {
+        if (!loggedIn && e.key == 'Enter') login();
 
-    if (!loading && e.key == 'r') player.reset();
+        if (!loading && e.key == 'r') player.reset();
 
-    if (e.key == 't') {
-        sendPacket('mapData', { mapX: 0, mapY: 0 });
+        if (e.key == 't') {
+            sendPacket('mapData', { mapX: 0, mapY: 0 });
+        }
+
+        if (e.key == 'w' || e.key == ' ') keys.w = true;
+        if (e.key == 's') keys.s = true;
+        if (e.key == 'a') keys.a = true;
+        if (e.key == 'd') keys.d = true;
+    } else {
+        if (e.key == 'Enter') {
+            sendPacket('message', { message: document.getElementById('chatinput').value });
+            document.getElementById('chatinput').value = '';
+            document.getElementById('chatinput').blur();
+            typing = false;
+        }
     }
-
-    if (e.key == 'w' || e.key == ' ') keys.w = true;
-    if (e.key == 's') keys.s = true;
-    if (e.key == 'a') keys.a = true;
-    if (e.key == 'd') keys.d = true;
 })
 
 window.addEventListener('keyup', e => {
+    if (!typing) {
+        if (e.key === '.') {
+            typing = true;
+            document.getElementById('chatinput').value = '';
+            document.getElementById('chatinput').focus();
+        }
+    }
     if (e.key == 'w' || e.key == ' ') keys.w = false;
     if (e.key == 's') keys.s = false;
     if (e.key == 'a') keys.a = false;
     if (e.key == 'd') keys.d = false;
+})
+
+document.getElementById('chatinput').addEventListener('focusout', e => {
+    typing = false;
+})
+
+document.getElementById('chatinput').addEventListener('click', e => {
+    typing = true;
 })
 
 const movePlayer = keys => {
@@ -382,6 +434,9 @@ class Player {
                         break;
                     case 'spawn':
                         break;
+                    case 'reset':
+                        this.reset();
+                        break;
                     default:
                         this.x = wall.x - this.w;
                         if (this.vx >= 0) this.vx = 0;
@@ -395,6 +450,9 @@ class Player {
                         this.x = wall.right;
                         this.vx = -this.vx * 2;
                         break;
+                    case 'reset':
+                        this.reset();
+                        break;
                     case 'spawn':
                         break;
                     default:
@@ -406,12 +464,10 @@ class Player {
             //collision with top wall
             if (this.x + this.w > wall.x && this.x < wall.right && this.y + this.h + this.vy > wall.y && this.y + this.h < wall.y + range) {
                 switch (wall.type) {
-                    case 'solid':
-                        this.y = wall.y - this.h;
-                        this.vy = 0;
-                        this.onGround = true;
-                        break;
                     case 'spawn':
+                        break;
+                    case 'reset':
+                        this.reset();
                         break;
                     case 'bounce':
                         this.y = wall.y - this.h;
@@ -439,6 +495,9 @@ class Player {
                         break;
                     case 'spawn':
                         break;
+                    case 'reset':
+                        this.reset();
+                        break;
                     default:
                         this.y = wall.bottom;
                         if (this.vy <= 0) this.vy = 0;
@@ -449,16 +508,16 @@ class Player {
 
         if (!this.onIce) {
             if (this.onGround) this.vx *= 0.9;
-            this.vx *= 0.9;
+            this.vx *= 0.98;
         }
 
         this.x += this.vx;
         this.y += this.vy;
 
-        if (this.x + this.w < 0) sendPacket('mapData', { mapX: this.mapX - 1, mapY: this.mapY });
-        if (this.x > w) sendPacket('mapData', { mapX: this.mapX + 1, mapY: this.mapY });
-        if (this.y + this.h < 0) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY + 1 });
-        if (this.y > h) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY - 1 });
+        if (this.x + this.w < 0) sendPacket('mapData', { mapX: this.mapX - 1, mapY: this.mapY, direction: 'left' });
+        if (this.x > w) sendPacket('mapData', { mapX: this.mapX + 1, mapY: this.mapY, direction: 'right' });
+        if (this.y + this.h < 0) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY + 1, direction: 'up' });
+        if (this.y > h) sendPacket('mapData', { mapX: this.mapX, mapY: this.mapY - 1, direction: 'down' });
     }
 
     reset() {
@@ -470,7 +529,7 @@ class Player {
 }
 
 class Friend {
-    constructor(x, y, vx, vy, onGround, username) {
+    constructor(x, y, vx, vy, onGround, username, friendFps) {
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -480,6 +539,7 @@ class Friend {
         this.h = player.h;
         this.color = '#fff';
         this.username = username;
+        this.mult = friendFps / fps;
     }
 
     draw() {
@@ -497,8 +557,8 @@ class Friend {
         if (!this.onGround) this.vy += 0.12;
         else this.vy = 0;
 
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += (this.vx * this.mult);
+        this.y += (this.vy * this.mult);
     }
 }
 
@@ -547,7 +607,11 @@ const renderHud = (playerMapX, playerMapY) => {
     ctx.font = '30px Arial';
     ctx.fillStyle = 'white';
 
-    ctx.fillText(`map position: ${playerMapX}, ${playerMapY}`, 10, 30);
+    const mapPos = `map position: ${playerMapX}, ${playerMapY}`
+    const playerPos = `player position: ${Math.round(player.x * 100)}, ${Math.round(player.y * 100)}`
+
+    ctx.fillText(mapPos, w / 2 - (ctx.measureText(mapPos).width / 2), 30);
+    ctx.fillText(playerPos, w / 2 - (ctx.measureText(playerPos).width / 2), 60);
 }
 
 const renderPlayers = (player, friends) => {
@@ -566,7 +630,6 @@ const renderMap = (walls, signs) => {
 }
 
 const render = () => {
-    let startTime = Date.now();
     ctx.clearRect(0, 0, w, h);
 
     if (!walls.length && !loading) {
@@ -580,17 +643,22 @@ const render = () => {
         renderPlayers(player, friends);
         renderHud(player.mapX, player.mapY);
 
-        if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround });
+        ctx.fillText(`f|m: ${fps} | ${1000 / fps} `, w / 2 - (ctx.measureText(`f|m: ${fps} | ${1000 / fps} `).width / 2), 90);
+
+        if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround, fps: fps });
     }
 
+    let renderTime = Date.now() - frameStart;
+    if (lastFrames.length >= 10) lastFrames.shift();
+    lastFrames.push(renderTime);
+
+    let average = 0;
+    lastFrames.forEach(frame => average += frame);
+    average /= lastFrames.length;
+
+    fps = Math.round(1000 / average);
+
+    frameStart = Date.now();
     frame++;
-
-    let time = Date.now() - startTime;
-    if (time < 1000 / fps) {
-        setTimeout(() => {
-            requestAnimationFrame(render);
-        }, 1000 / fps - time);
-    } else {
-        requestAnimationFrame(render);
-    }
+    requestAnimationFrame(render);
 }

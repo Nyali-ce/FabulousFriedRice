@@ -1,6 +1,5 @@
 html,
 body {
-    /* circular gradient f5a9b8 to 36393f*/
     background: radial-gradient(circle at center, #f5a9b8 0%, #36393f 100%);
     height: 100vh;
     overflow: hidden;
@@ -232,37 +231,89 @@ p.progress-text {
     z-index: 1;
 }
 
-/* 
-    to hide a scrollbar in a div
-    overflow: hidden;
+div#chatBox {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 
-    to auto scroll to the bottom of a div
-    overflow: auto;
-*/
+div#hidechat {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 400px;
+    height: 23px;
+    background: #36393f;
+    opacity: 0.8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left: 10px;
+    padding-top: 2px;
+}
 
 div#chat {
     position: absolute;
-    top: 0px;
+    top: 25px;
     left: 0px;
-    width: 300px;
-    height: 150px;
+    width: 390px;
+    height: 200px;
     background: #36393f;
     opacity: 0.8;
-    border-radius: 10px;
     color: white;
-    padding: 3px;
+    padding: 10px;
     overflow: auto;
-    display: none;
+    scrollbar-color: #f5a9b8 #36393f;
+    scrollbar-width: thin;
+}
+
+div#chat::-webkit-scrollbar {
+    width: 10px;
+}
+
+div#chat::-webkit-scrollbar-track {
+    background: #36393f;
+}
+
+div#chat::-webkit-scrollbar-thumb {
+    background-color: #f5a9b8;
+    border-radius: 20px;
+    border: 3px solid #36393f;
+}
+
+input#chatinput {
+    position: absolute;
+    top: 245px;
+    left: 0px;
+    width: 390px;
+    height: 23px;
+    background: #36393f;
+    opacity: 0.8;
+    color: white;
+    padding: 10px;
+    border: none;
+    outline: none;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 p.message {
     margin: 0;
     padding: 0;
     color: #fff;
-    font-size: 15px;
+    font-size: 20px;
+    height: 24px;
+    font-family: Arial, Helvetica, sans-serif;
     line-height: 16px;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
     border-top: 1px solid #fff;
+    padding-top: 5px;
     z-index: 1;
     height: 20;
 }

@@ -19,12 +19,16 @@ module.exports = async function (socket, data) {
 
     console.log(`Map data (${data.mapX}, ${data.mapY}) sent to ${socket?.userData?.username ?? 'unknown'}`);
 
+    const finalData = {
+        mapX: data.mapX,
+        mapY: data.mapY,
+        mapData: localMapData,
+    }
+
+    if (data.direction) finalData.mapData.direction = data.direction;
+
     return socket.send(JSON.stringify({
         type: 'mapData',
-        data: {
-            mapX: data.mapX,
-            mapY: data.mapY,
-            mapData: localMapData,
-        }
+        data: finalData,
     }))
 };

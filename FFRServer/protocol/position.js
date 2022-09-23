@@ -16,6 +16,8 @@ module.exports = async function (socket, data) {
     if (data?.mapY == undefined) return error('Missing mapY');
     if (data?.vx == undefined) return error('Missing vx');
     if (data?.vy == undefined) return error('Missing vy');
+    if (data?.onGround == undefined) return error('Missing onGround');
+    if (data?.fps == undefined) return error('Missing fps');
 
     if (!socket.userData) return error('Not logged in');
 
@@ -31,8 +33,7 @@ module.exports = async function (socket, data) {
     socket.userData.position.vx = data.vx;
     socket.userData.position.vy = data.vy;
     socket.userData.position.onGround = data.onGround;
-
-    console.log(`User ${userData.username} position updated`);
+    socket.userData.fps = data.fps;
 
     if (!socket.lastSave || socket.lastSave < new Date().getTime() - 2000) {
         socket.lastSave = new Date().getTime();

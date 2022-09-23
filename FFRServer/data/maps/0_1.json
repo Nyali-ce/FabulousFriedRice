@@ -55,6 +55,22 @@
             "h": 50,
             "color": "white",
             "type": "solid"
+        },
+        {
+            "x": 1450,
+            "y": 1000,
+            "w": 50,
+            "h": 50,
+            "color": "red",
+            "type": "reset"
+        },
+        {
+            "x": 1870,
+            "y": 730,
+            "w": 50,
+            "h": 350,
+            "color": "white",
+            "type": "solid"
         }
     ],
     "startPosX": 960,
