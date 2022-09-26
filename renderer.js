@@ -149,14 +149,9 @@ const packetHandler = packet => {
 
             loggedIn = true;
 
-            const { userData } = packet.data;
+            switchPlayerData(packet.data.userData);
 
-            username = userData.username;
-            player.x = userData.position.x;
-            player.y = userData.position.y;
-            player.mapX = userData.position.mapX;
-            player.mapY = userData.position.mapY;
-            player.id = userData.id;
+            const { userData } = packet.data;
 
             document.getElementById('login').remove();
 
@@ -196,8 +191,6 @@ const packetHandler = packet => {
                 switchMap(packet.data);
                 document.getElementById('chatBox').style.display = 'block';
             }
-
-
             break;
         case 'players':
             if (!packet.data.players) return;
@@ -222,6 +215,10 @@ const packetHandler = packet => {
             break;
         case 'message':
             chatMessage(packet.data.message, packet.data.username);
+            break;
+        case 'playerData':
+            switchPlayerData(packet.data.userData);
+            break;
     }
 }
 
@@ -271,11 +268,28 @@ const switchMap = data => {
         }
     } else firstMapPacket = false;
 
-    walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type));
+    walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type, wall.name));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
 
     if (mapData.signs) signs = mapData.signs.map(sign => new Sign(sign.x, sign.y, sign.text, sign.font, sign.color));
     else signs = [];
+}
+
+const switchPlayerData = userData => {
+    username = userData.username;
+    player.x = userData.position.x;
+    player.y = userData.position.y;
+    player.mapX = userData.position.mapX;
+    player.mapY = userData.position.mapY;
+    player.id = userData.id;
+
+    if (userData.abilities) {
+        userData.abilities.forEach(abilityData => {
+            const ability = {
+                run: eval(JSON.parse(abilityData.run))
+            }
+        })
+    }
 }
 
 const sendPacket = (type, data) => {
@@ -298,7 +312,7 @@ const wsConnect = () => {
     }
 
     ws.onclose = () => {
-        popup('Connection lost (go scream at me on discord)');
+        popup('Connection lost (go scream at me on discord) (code 06)');
         console.log('disconnected');
         wsConnect();
     }
@@ -409,6 +423,8 @@ class Player {
         this.onGround = false;
         this.onIce = false;
         this.id = 0;
+        this.canDash = false;
+        this.abilities = [];
     }
 
     draw() {
@@ -422,6 +438,8 @@ class Player {
 
     update() {
         movePlayer(keys);
+
+        this.abilities.forEach(ability => ability.run());
 
         this.vy += 0.12;
 
@@ -446,6 +464,9 @@ class Player {
                     case 'reset':
                         this.reset();
                         break;
+                    case 'ability':
+                        sendPacket('ability', { name: wall.name });
+                        break;
                     default:
                         this.x = wall.x - this.w;
                         if (this.vx >= 0) this.vx = 0;
@@ -463,6 +484,9 @@ class Player {
                         this.reset();
                         break;
                     case 'spawn':
+                        break;
+                    case 'ability':
+                        sendPacket('ability', { name: wall.name });
                         break;
                     default:
                         this.x = wall.right;
@@ -488,6 +512,9 @@ class Player {
                         this.onGround = true;
                         this.onIce = true;
                         break;
+                    case 'ability':
+                        sendPacket('ability', { name: wall.name });
+                        break;
                     default:
                         this.y = wall.y - this.h;
                         this.vy = 0;
@@ -506,6 +533,9 @@ class Player {
                         break;
                     case 'reset':
                         this.reset();
+                        break;
+                    case 'ability':
+                        sendPacket('ability', { name: wall.name });
                         break;
                     default:
                         this.y = wall.bottom;
@@ -572,7 +602,7 @@ class Friend {
 }
 
 class Wall {
-    constructor(x, y, w, h, color, type) {
+    constructor(x, y, w, h, color, type, name) {
         this.x = x;
         this.y = y;
         this.w = w;
@@ -581,6 +611,7 @@ class Wall {
         this.right = x + w;
         this.bottom = y + h;
         this.type = type;
+        this.name = name;
     }
 
     draw() {

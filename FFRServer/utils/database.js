@@ -15,5 +15,6 @@ const request = (path, dataType, id, data, create) => {
 
 module.exports = {
     user: (user_ID, data) => { return request(`data/users/${user_ID}.json`, {}, user_ID, data, false) },
-    mapData: (mapX, mapY) => { return request(`data/maps/${mapX}_${mapY}.json`, {}, `${mapX}_${mapY}`, undefined, false) }
+    mapData: (mapX, mapY) => { return request(`data/maps/${mapX}_${mapY}.json`, {}, `${mapX}_${mapY}`, undefined, false) },
+    ability: (name) => { return request(`data/maps/${name}.js`), {}, name, false },
 }
