@@ -286,7 +286,7 @@ const sendPacket = (type, data) => {
 }
 
 const wsConnect = () => {
-    ws = new WebSocket('ws://nyalice.com:8080');
+    ws = new WebSocket('ws://localhost:8080');
 
     ws.onopen = () => {
         console.log('connected');

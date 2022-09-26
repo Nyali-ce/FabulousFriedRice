@@ -17,8 +17,6 @@ module.exports = async function (socket, data) {
 
     if (localMapData == undefined) return error('Map data not found');
 
-    console.log(`Map data (${data.mapX}, ${data.mapY}) sent to ${socket?.userData?.username ?? 'unknown'}`);
-
     const finalData = {
         mapX: data.mapX,
         mapY: data.mapY,

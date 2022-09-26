@@ -12,6 +12,8 @@ module.exports = async function (socket, data, clients) {
     if (data.message.length > 100) return error('Message must be less than 100 characters long');
     if (data.message.length < 1) return error('Message must be at least 1 character long');
 
+    if (data?.username ?? false) return error('Missing username');
+
     console.log(`Message sent by ${socket.userData.username}: ${data.message}`);
 
     clients.forEach(client => {

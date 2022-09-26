@@ -2,6 +2,7 @@ const fs = require('fs');
 const { WebSocketServer } = require('ws')
 
 const port = 8080;
+const positionPerSecond = 10;
 
 let positionInterval;
 let intervalLoop = false;
@@ -41,7 +42,7 @@ const sendPositionLoop = active => {
                     }
                 }));
             }
-        }, 100);
+        }, 1000 / positionPerSecond);
         intervalLoop = true;
     }
     else {
