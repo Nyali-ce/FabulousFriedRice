@@ -288,6 +288,7 @@ const switchPlayerData = userData => {
             const ability = {
                 run: eval(JSON.parse(abilityData.run))
             }
+            console.log(ability);
         })
     }
 }
