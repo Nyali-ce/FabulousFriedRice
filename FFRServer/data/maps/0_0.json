@@ -55,15 +55,6 @@
             "h": 50,
             "color": "white",
             "type": "solid"
-        },
-        {
-            "x": 750,
-            "y": 800,
-            "w": 50,
-            "h": 50,
-            "color": "pink",
-            "type": "ability",
-            "name": "dash"
         }
     ],
     "signs": [

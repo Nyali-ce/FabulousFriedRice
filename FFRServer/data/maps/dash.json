@@ -1,3 +1,5 @@
 {
-    "run": "() => {if (this.onGround) this.canDash = true;if (keys.shift && this.canDash && !this.onGround) {if (keys.a) this.vx = -5;else if (keys.d) this.vx = 5;else if (this.vx < 0) this.vx = -5;else if (this.vx > 0) this.vx = 5;this.canDash = false;}}"
+    "run": "let boost = 10;if (player.onGround) player.canDash = true;if (keys.shift && player.canDash && !player.onGround) {if (keys.a) player.vx = -boost;else if (keys.d) player.vx = boost;else if (player.vx < 0) player.vx = -boost;else if (player.vx > 0) player.vx = boost;player.canDash = false;}",
+    "key": "shift",
+    "message": "You have gained the ability to dash! Press shift to dash in the direction you are moving."
 }

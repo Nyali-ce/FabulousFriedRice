@@ -151,8 +151,6 @@ const packetHandler = packet => {
 
             switchPlayerData(packet.data.userData);
 
-            const { userData } = packet.data;
-
             document.getElementById('login').remove();
 
             render()
@@ -216,7 +214,8 @@ const packetHandler = packet => {
         case 'message':
             chatMessage(packet.data.message, packet.data.username);
             break;
-        case 'playerData':
+        case 'userData':
+            console.log(packet.data.userData)
             switchPlayerData(packet.data.userData);
             break;
     }
@@ -285,10 +284,11 @@ const switchPlayerData = userData => {
 
     if (userData.abilities) {
         userData.abilities.forEach(abilityData => {
-            const ability = {
-                run: eval(JSON.parse(abilityData.run))
-            }
-            console.log(ability);
+            const ability = abilityData.run;
+            player.abilities.push(ability);
+
+            const message = abilityData.message;
+            if (message) chatMessage(message, 'system');
         })
     }
 }
@@ -347,22 +347,26 @@ const keys = {
     a: false,
     s: false,
     d: false,
+    shift: false,
 }
 
 window.addEventListener('keydown', e => {
+    console.log(e.key)
     if (!typing) {
         if (!loggedIn && e.key == 'Enter') login();
 
-        if (!loading && e.key == 'r') player.reset();
+        if (!loading && e.key == '-') player.reset();
 
-        if (e.key == 't') {
+        if (e.key == '=') {
             sendPacket('mapData', { mapX: 0, mapY: 0 });
         }
-
-        if (e.key == 'w' || e.key == ' ') keys.w = true;
-        if (e.key == 's') keys.s = true;
-        if (e.key == 'a') keys.a = true;
-        if (e.key == 'd') keys.d = true;
+        let actualKey = e.key;
+        if (e.key === 'W' || e.key === 'A' || e.key === 'S' || e.key === 'D') actualKey = e.key.toLowerCase();
+        if (actualKey == 'w' || e.key == ' ') keys.w = true;
+        if (actualKey == 's') keys.s = true;
+        if (actualKey == 'a') keys.a = true;
+        if (actualKey == 'd') keys.d = true;
+        if (actualKey == 'Shift') keys.shift = true;
     } else {
         if (e.key == 'Enter') {
             const chatInput = document.getElementById('chatinput');
@@ -382,6 +386,7 @@ window.addEventListener('keydown', e => {
 })
 
 window.addEventListener('keyup', e => {
+
     if (!typing) {
         if (e.key === '.') {
             typing = true;
@@ -389,10 +394,13 @@ window.addEventListener('keyup', e => {
             document.getElementById('chatinput').focus();
         }
     }
-    if (e.key == 'w' || e.key == ' ') keys.w = false;
-    if (e.key == 's') keys.s = false;
-    if (e.key == 'a') keys.a = false;
-    if (e.key == 'd') keys.d = false;
+    let actualKey = e.key;
+    if (e.key === 'W' || e.key === 'A' || e.key === 'S' || e.key === 'D') actualKey = e.key.toLowerCase();
+    if (actualKey == 'w' || e.key == ' ') keys.w = false;
+    if (actualKey == 's') keys.s = false;
+    if (actualKey == 'a') keys.a = false;
+    if (actualKey == 'd') keys.d = false;
+    if (actualKey == 'Shift') keys.shift = false;
 })
 
 document.getElementById('chatinput').addEventListener('focusout', e => {
@@ -440,7 +448,7 @@ class Player {
     update() {
         movePlayer(keys);
 
-        this.abilities.forEach(ability => ability.run());
+        this.abilities.forEach(ability => eval(ability));
 
         this.vy += 0.12;
 

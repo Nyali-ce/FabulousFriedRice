@@ -22,21 +22,14 @@ module.exports = async function (socket, data, clients) {
     if (!userData) return error('Invalid username')
     if (data.password !== userData.password) return error('Invalid password')
 
+    delete userData.password;
+
     socket.userData = userData;
 
     socket.send(JSON.stringify({
         type: 'login',
         data: {
-            userData: {
-                username: userData.username,
-                id: userData.id,
-                position: {
-                    x: userData.position.x,
-                    y: userData.position.y,
-                    mapX: userData.position.mapX,
-                    mapY: userData.position.mapY
-                }
-            }
+            userData,
         }
     }))
 

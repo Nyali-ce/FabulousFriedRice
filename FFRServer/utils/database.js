@@ -7,7 +7,6 @@ const request = (path, dataType, id, data, create) => {
             if (!create) return undefined;
             fs.writeFileSync(path, JSON.stringify(dataType));
         }
-        console.log(fs.readFileSync(path).toString());
         return JSON.parse(fs.readFileSync(path));
     } else {
         fs.writeFileSync(path, JSON.stringify(data));
