@@ -9,6 +9,8 @@ String.prototype.nyaliceHash = function () {
     return hash;
 }
 
+// Hello :)
+
 let formType = 'login';
 
 const signupBtn = document.getElementById('signupBtn');
@@ -164,6 +166,7 @@ const packetHandler = packet => {
             if (loading) {
                 loadingAnimation(6);
 
+                // (ఠ_ఠ)
                 setTimeout(() => {
                     loadingAnimation(26);
                     setTimeout(() => {
@@ -175,7 +178,6 @@ const packetHandler = packet => {
                                 setTimeout(() => {
                                     loadingAnimation(100);
                                     setTimeout(() => {
-
                                         switchMap(packet.data);
                                         loadingAnimation('end');
                                         document.getElementById('chatBox').style.display = 'block';
@@ -313,7 +315,7 @@ const wsConnect = () => {
     }
 
     ws.onclose = () => {
-        popup('Connection lost (go scream at me on discord) (code 06)');
+        popup('Connection lost (go scream at me on discord) (code 01 (server crashed lmfaoo))');
         console.log('disconnected');
         wsConnect();
     }
