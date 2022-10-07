@@ -353,15 +353,13 @@ const keys = {
 }
 
 window.addEventListener('keydown', e => {
-    console.log(e.key)
     if (!typing) {
         if (!loggedIn && e.key == 'Enter') login();
 
         if (!loading && e.key == '-') player.reset();
+        if (e.key == '=') sendPacket('mapData', { mapX: 0, mapY: 0 });
 
-        if (e.key == '=') {
-            sendPacket('mapData', { mapX: 0, mapY: 0 });
-        }
+
         let actualKey = e.key;
         if (e.key === 'W' || e.key === 'A' || e.key === 'S' || e.key === 'D') actualKey = e.key.toLowerCase();
         if (actualKey == 'w' || e.key == ' ') keys.w = true;
@@ -660,9 +658,12 @@ const renderHud = (playerMapX, playerMapY) => {
 
     const mapPos = `map position: ${playerMapX}, ${playerMapY}`
     const playerPos = `player position: ${Math.round(player.x * 100)}, ${Math.round(player.y * 100)}`
+    const fpsText = `fps: ${fps} | ${Math.floor(1000 / fps)}`
 
     ctx.fillText(mapPos, w / 2 - (ctx.measureText(mapPos).width / 2), 30);
     ctx.fillText(playerPos, w / 2 - (ctx.measureText(playerPos).width / 2), 60);
+    ctx.fillText(fpsText, w / 2 - (ctx.measureText(fpsText).width / 2), 90);
+
 }
 
 const renderPlayers = (player, friends) => {
@@ -693,8 +694,6 @@ const render = () => {
         renderMap(walls, signs);
         renderPlayers(player, friends);
         renderHud(player.mapX, player.mapY);
-
-        ctx.fillText(`fps: ${fps} | ${Math.floor(1000 / fps)}`, w / 2 - (ctx.measureText(`fps: ${fps} | ${Math.floor(1000 / fps)}`).width / 2), 90);
 
         if (frame % 6 == 0) sendPacket('position', { x: player.x, y: player.y, mapX: player.mapX, mapY: player.mapY, vx: player.vx, vy: player.vy, onGround: player.onGround, fps: fps });
     }
