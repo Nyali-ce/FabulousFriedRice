@@ -17,6 +17,7 @@ const wallTypes = ['solid', 'spawn', 'bounce', 'ice', 'reset'];
 let buildMode = buildModes[0];
 let wallType = wallTypes[0];
 let tempWallStart = null;
+let tempSign = null;
 let curColor;
 
 const colorPicker = document.getElementById('color');
@@ -71,6 +72,12 @@ window.addEventListener('mousedown', e => {
         startPosX = cursor.x - player.w / 2;
         startPosY = cursor.y - player.h / 2;
     }
+
+    if (buildMode === 'placeSign') {
+        const signText = prompt('enter text');
+
+        if (signText) signs.push(new Sign(cursor.x, cursor.y, signText, '30px Arial', curColor));
+    }
 });
 
 window.addEventListener('mouseup', e => {
@@ -99,7 +106,24 @@ window.addEventListener('mouseup', e => {
 });
 
 window.addEventListener('keydown', e => {
-    if (e.key == 'Enter') login();
+    if (e.key == '=') {
+        // export map as json
+        const map = {
+            walls,
+            signs,
+            startPosX,
+            startPosY,
+        }
+
+        const mapString = JSON.stringify(map);
+
+        const ach = document.createElement('a');
+        ach.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(mapString);
+        ach.download = 'map.json';
+        document.body.appendChild(ach);
+        ach.click();
+        document.body.removeChild(ach);
+    }
     if (e.key == '-') player.reset();
 
     let actualKey = e.key;
@@ -373,10 +397,12 @@ const renderHud = () => {
     const cycleBuildModeText = `Cycle Build Mode: ctrl`;
     const cycleWallTypeText = `Cycle Wall Type: shift`;
     const respawnText = `Respawn: -`;
+    const saveText = `Save: =`;
 
     ctx.fillText(cycleBuildModeText, w - ctx.measureText(cycleBuildModeText).width - 10, 30);
     ctx.fillText(cycleWallTypeText, w - ctx.measureText(cycleWallTypeText).width - 10, 60);
     ctx.fillText(respawnText, w - ctx.measureText(respawnText).width - 10, 90);
+    ctx.fillText(saveText, w - ctx.measureText(saveText).width - 10, 120);
 }
 
 const renderPlayers = player => {
