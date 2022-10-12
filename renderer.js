@@ -426,6 +426,8 @@ class Player {
         this.mapY = 0;
         this.vx = 0;
         this.vy = 0;
+        this.maxVx = 10;
+        this.maxVy = 10;
         this.w = 50;
         this.h = 50;
         this.color = '#fff';
@@ -467,6 +469,7 @@ class Player {
                     case 'bounce':
                         this.x = wall.x - this.w;
                         this.vx = -this.vx * 3;
+                        player.onGround = true;
                         break;
                     case 'spawn':
                         break;
@@ -488,6 +491,7 @@ class Player {
                     case 'bounce':
                         this.x = wall.right;
                         this.vx = -this.vx * 3;
+                        player.onGround = true;
                         break;
                     case 'reset':
                         this.reset();
@@ -558,6 +562,11 @@ class Player {
             if (this.onGround) this.vx *= 0.9;
             this.vx *= 0.98;
         }
+
+        if (this.vx > this.maxVx) this.vx = this.maxVx;
+        if (this.vx < -this.maxVx) this.vx = -this.maxVx;
+        if (this.vy > this.maxVy) this.vy = this.maxVy;
+        if (this.vy < -this.maxVy) this.vy = -this.maxVy;
 
         this.x += this.vx;
         this.y += this.vy;

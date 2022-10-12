@@ -5,13 +5,30 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        input {
+            position: absolute;
+            top: 70px;
+            left: 100px;
+            width: 50px;
+            height: 25px;
+            border: 1px solid black;
+        }
+    </style>
     <title>Document</title>
 </head>
 
 <body>
+    <input type="color" id="color">
     <canvas id="canvas"></canvas>
 
-    <script src="./srcipt.js"></script>
+    <script src="srcipt.js"></script>
 </body>
 
 </html>
