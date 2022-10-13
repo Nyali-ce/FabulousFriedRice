@@ -12,15 +12,20 @@ function createWindow() {
           click() {
             mainWindow.setFullScreen(!mainWindow.isFullScreen())
           }
+        }, {
+          label: 'Reload',
+          accelerator: 'F5',
+          click() {
+            mainWindow.reload()
+          }
         },
       ]
     },
     {
-      label: '🍆🍑😏🤨😳💅',
+      label: 'I want boobies 🍆🍑😏💅',
       submenu: [
         {
           label: 'full mega hacker mode',
-          // accelerator: 'ctrl+shift+alt+p+o+u+k+i',
           accelerator: 'f12',
           click() {
             mainWindow.webContents.openDevTools()
