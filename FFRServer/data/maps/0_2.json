@@ -51,5 +51,6 @@
         }
     ],
     "startPosX": 800,
-    "startPosY": 800
+    "startPosY": 800,
+    "backGround": ""
 }

@@ -11,6 +11,9 @@ module.exports = async function (socket, data, clients) {
     }
 
     if (!data?.username) return error('Missing username');
+
+    data.username = data.username.trim();
+
     if (data.username.length > 20) return error('Username must be less than 20 characters long');
     if (data.username.length < 3) return error('Username must be at least 3 characters long');
 

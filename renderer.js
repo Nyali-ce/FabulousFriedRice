@@ -24,6 +24,8 @@ frogotPasswordBtn.addEventListener('click', () => {
     frogotPasswordBtn.innerHTML = 'didn\'t ask';
 })
 
+let popupClick = false;
+
 const popup = message => {
     if (document.getElementById('popup')) return;
     const main = document.getElementById('login');
@@ -40,8 +42,16 @@ const popup = message => {
         popupDiv.remove();
         main.style.filter = 'none';
     });
+
     popupDiv.appendChild(removeBtn);
     document.body.appendChild(popupDiv);
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && document.getElementById('popup')) {
+            popupClick = true;
+            removeBtn.click();
+        }
+    })
 }
 
 const login = () => {
@@ -181,6 +191,7 @@ const packetHandler = packet => {
                                         switchMap(packet.data);
                                         loadingAnimation('end');
                                         document.getElementById('chatBox').style.display = 'block';
+                                        document.body.style.background = 'black';
                                     }, 500)
                                 }, 600);
                             }, 600);
@@ -190,6 +201,7 @@ const packetHandler = packet => {
             } else {
                 switchMap(packet.data);
                 document.getElementById('chatBox').style.display = 'block';
+                document.body.style.background = 'black';
             }
             break;
         case 'players':
@@ -250,6 +262,12 @@ document.getElementById('hidechat').onclick = () => {
     }
 }
 
+document.getElementById('disableAnimations').onclick = () => {
+    animationEnabled = false;
+    document.querySelector('.c').remove();
+    cancelAnimationFrame(animationId);
+}
+
 const switchMap = data => {
     const { mapData } = data;
 
@@ -268,6 +286,13 @@ const switchMap = data => {
             else if (mapData.direction === 'down') player.y = 1;
         }
     } else firstMapPacket = false;
+
+
+    if (animationEnabled) {
+        cancelAnimationFrame(animationId);
+        document.querySelector('.c').getContext('2d').clearRect(0, 0, w, h);
+        if (mapData.backGround) eval(mapData.backGround);
+    }
 
     walls = mapData.walls.map(wall => new Wall(wall.x, wall.y, wall.w, wall.h, wall.color, wall.type, wall.name));
     walls.push(new Wall(mapData.startPosX, mapData.startPosY, player.w, player.h, 'rgba(0,0,255,0.4)', 'spawn'));
@@ -329,6 +354,9 @@ wsConnect();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+let animationId;
+let animationEnabled = true;
+
 let w = canvas.width = 1920;
 let h = canvas.height = 1080;
 
@@ -354,7 +382,10 @@ const keys = {
 
 window.addEventListener('keydown', e => {
     if (!typing) {
-        if (!loggedIn && e.key == 'Enter') login();
+        if (e.key == 'Enter') {
+            if (popupClick) popupClick = false;
+            else if (!loggedIn) login();
+        }
 
         if (!loading && e.key == '-') player.reset();
         if (e.key == '=') sendPacket('mapData', { mapX: 0, mapY: 0 });
@@ -403,11 +434,11 @@ window.addEventListener('keyup', e => {
     if (actualKey == 'Shift') keys.shift = false;
 })
 
-document.getElementById('chatinput').addEventListener('focusout', e => {
+document.getElementById('chatinput').addEventListener('focusout', _e => {
     typing = false;
 })
 
-document.getElementById('chatinput').addEventListener('focusin', e => {
+document.getElementById('chatinput').addEventListener('focusin', _e => {
     typing = true;
 })
 
@@ -683,11 +714,12 @@ const renderPlayers = (player, friends) => {
 }
 
 const renderMap = (walls, signs) => {
-    ctx.fillStyle = '#607279';
-    ctx.fillRect(0, 0, w, h);
-
     walls.forEach(wall => wall.draw());
     signs.forEach(sign => sign.draw());
+
+    ctx.fillStyle = 'white';
+    ctx.font = '15px Arial';
+    ctx.fillText('spawn', startPosX - (ctx.measureText('spawn').width / 2) + player.w / 2, startPosY - 10 + player.h / 2);
 }
 
 const render = () => {
