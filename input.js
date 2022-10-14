@@ -1,67 +1,59 @@
-let c = document.getElementById("c");
-let w2 = c.width = window.innerWidth;
-let h2 = c.height = window.innerHeight;
-let ctx = c.getContext("2d");
+let c = document.querySelector('.c');
+let ctx2 = c.getContext('2d');
 
 let maxParticles = 50;
 let particles = [];
 let hue = 183;
 
-let mouse = {};
-mouse.size = 50;
-mouse.x = player.x + player.w / 2
-mouse.y = player.y + player.h / 2
+let random = (min, max) => {
+    return Math.random() * (max - min) + min;
+};
 
-let clearColor = "rgba(0, 0, 0, .3)";
-
-function random(min, max) {
-    return Math.random() * (max - min) + min
-}
-
-function distance(x1, y1, x2, y2) {
-    return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-}
-
-function P() { }
-
-P.prototype = {
-    init: function () {
+class Particle {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.size = 0;
+        this.origSize = 0;
+        this.sides = 0;
+        this.life = 0;
+        this.maxLife = 0;
+        this.alpha = 0;
+    }
+    init() {
         this.size = this.origSize = random(3, 8);
-        this.x = mouse.x;
-        this.y = mouse.y;
+        this.x = player.x + player.w / 2;
+        this.y = player.y + player.h / 2;
         this.sides = random(3, 10);
         this.vx = random(-5, 5);
         this.vy = random(-5, 5);
         this.life = 0;
         this.maxLife = random(50, 200);
         this.alpha = 1;
-    },
-
-    draw: function () {
-        ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = "hsla(" + hue + ", 100%, 50%, " + this.alpha + ")";
-        ctx.fillStyle = "hsla(" + hue + ", 100%, 50%, " + (this.alpha * .4) + ")";
-        ctx.beginPath();
-        ctx.moveTo(this.x + this.size * Math.cos(0), this.y + this.size * Math.sin(0));
+    }
+    draw() {
+        ctx2.strokeStyle = 'hsla(' + hue + ', 100%, 50%, ' + this.alpha + ')';
+        ctx2.fillStyle = 'hsla(' + hue + ', 100%, 50%, ' + (this.alpha * .4) + ')';
+        ctx2.beginPath();
+        ctx2.moveTo(this.x + this.size * Math.cos(0), this.y + this.size * Math.sin(0));
         for (let i = 0; i < this.sides; i++) {
-            ctx.lineTo(this.x + this.size * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.size * Math.sin(i * 2 * Math.PI / this.sides));
+            ctx2.lineTo(this.x + this.size * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.size * Math.sin(i * 2 * Math.PI / this.sides));
         }
-        ctx.closePath();
-        ctx.lineWidth = this.size / 20;
-        ctx.fill();
-        ctx.stroke();
+        ctx2.closePath();
+        ctx2.lineWidth = this.size / 20;
+        ctx2.fill();
+        ctx2.stroke();
         this.update();
-    },
-
-    update: function () {
+    }
+    update() {
         let rad = this.size / 2;
-
         if (this.life <= this.maxLife) {
-            if ((this.x - rad <= 0 && this.vx < 0) || (this.x + rad >= w2 && this.vx > 0)) {
+            if ((this.x - rad <= 0 && this.vx < 0) || (this.x + rad >= w && this.vx > 0)) {
                 this.vx *= -1;
             }
-
-            if ((this.y - rad <= 0 && this.vy < 0) || (this.y + rad >= h2 && this.vy > 0)) {
+            if ((this.y - rad <= 0 && this.vy < 0) || (this.y + rad >= h && this.vy > 0)) {
                 this.vy *= -1;
             }
             this.alpha *= .978;
@@ -73,43 +65,23 @@ P.prototype = {
         } else {
             this.init();
         }
-
     }
 }
 
-window.addEventListener("resize", function () {
-    w2 = c.width = window.innerWidth;
-    h2 = c.height = window.innerHeight;
-    mouse.x = w2 / 2;
-    mouse.y = h2 / 2;
-});
-
-for (let i = 1; i <= maxParticles; i++) {
-    setTimeout(function () {
-        let p = new P();
+let init = () => {
+    for (let i = 0; i < maxParticles; i++) {
+        let p = new Particle();
         p.init();
         particles.push(p);
-    }, i * 50);
-}
-
-
-
-function anim() {
-    ctx.fillStyle = clearColor;
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillRect(0, 0, w2, h2);
-    mouse.x = player.x + player.w / 2;
-    mouse.y = player.y + player.h / 2;
-
-    for (let i in particles) {
-        let p = particles[i];
-        p.draw();
     }
+    anim();
+};
 
+let anim = () => {
+    ctx2.clearRect(0, 0, w, h);
     hue += .5;
+    for (const particle of particles) particle.draw();
     animationId = requestAnimationFrame(anim);
-}
+};
 
-anim();
-
-
+init();
